@@ -8,6 +8,17 @@ from utils.utils_ import load_data
 def test(device, args, log):
     (trainX, trainTE, trainY, valX, valTE, valY, testX, testTE,
      testY, SE, mean, std) = load_data(args)
+
+    trainX = trainX.to(device)
+    trainTE = trainTE.to(device)
+    trainY = trainY.to(device)
+    valX = valX.to(device)
+    valTE = valTE.to(device)
+    valY = valY.to(device)
+    testX = testX.to(device)
+    testTE = testTE.to(device)
+    testY = testY.to(device)
+    
     num_train, _, num_vertex = trainX.shape
     num_val = valX.shape[0]
     num_test = testX.shape[0]
@@ -31,8 +42,8 @@ def test(device, args, log):
         for batch_idx in range(train_num_batch):
             start_idx = batch_idx * args.batch_size
             end_idx = min(num_train, (batch_idx + 1) * args.batch_size)
-            X = trainX[start_idx: end_idx].to(device)
-            TE = trainTE[start_idx: end_idx].to(device)
+            X = trainX[start_idx: end_idx]
+            TE = trainTE[start_idx: end_idx]
             pred_batch = model(X, TE)
             trainPred.append(pred_batch.detach().clone())
             del X, TE, pred_batch
@@ -43,8 +54,8 @@ def test(device, args, log):
         for batch_idx in range(val_num_batch):
             start_idx = batch_idx * args.batch_size
             end_idx = min(num_val, (batch_idx + 1) * args.batch_size)
-            X = valX[start_idx: end_idx].to(device)
-            TE = valTE[start_idx: end_idx].to(device)
+            X = valX[start_idx: end_idx]
+            TE = valTE[start_idx: end_idx]
             pred_batch = model(X, TE)
             valPred.append(pred_batch.detach().clone())
             del X, TE, pred_batch
@@ -56,8 +67,8 @@ def test(device, args, log):
         for batch_idx in range(test_num_batch):
             start_idx = batch_idx * args.batch_size
             end_idx = min(num_test, (batch_idx + 1) * args.batch_size)
-            X = testX[start_idx: end_idx].to(device)
-            TE = testTE[start_idx: end_idx].to(device)
+            X = testX[start_idx: end_idx]
+            TE = testTE[start_idx: end_idx]
             pred_batch = model(X, TE)
             testPred.append(pred_batch.detach().clone())
             del X, TE, pred_batch
