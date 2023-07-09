@@ -18,6 +18,7 @@ def test(device, args, log):
     testX = testX.to(device)
     testTE = testTE.to(device)
     testY = testY.to(device)
+    SE = SE.to(device)
     
     num_train, _, num_vertex = trainX.shape
     num_val = valX.shape[0]
