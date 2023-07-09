@@ -31,9 +31,9 @@ def train(device, model, args, log, loss_criterion, optimizer, scheduler):
             break
         # shuffle
         permutation = torch.randperm(num_train)
-        trainX = trainX[permutation]
-        trainTE = trainTE[permutation]
-        trainY = trainY[permutation]
+        trainX = trainX[permutation].to(device)
+        trainTE = trainTE[permutation].to(device)
+        trainY = trainY[permutation].to(device)
         # train
         start_train = time.time()
         model.train()
@@ -41,9 +41,9 @@ def train(device, model, args, log, loss_criterion, optimizer, scheduler):
         for batch_idx in range(train_num_batch):
             start_idx = batch_idx * args.batch_size
             end_idx = min(num_train, (batch_idx + 1) * args.batch_size)
-            X = trainX[start_idx: end_idx].to(device)
-            TE = trainTE[start_idx: end_idx].to(device)
-            label = trainY[start_idx: end_idx].to(device)
+            X = trainX[start_idx: end_idx]
+            TE = trainTE[start_idx: end_idx]
+            label = trainY[start_idx: end_idx]
             optimizer.zero_grad()
             pred = model(X, TE)
             pred = pred * std + mean
