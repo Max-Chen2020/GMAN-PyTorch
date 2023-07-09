@@ -68,9 +68,9 @@ def train(device, model, args, log, loss_criterion, optimizer, scheduler):
             for batch_idx in range(val_num_batch):
                 start_idx = batch_idx * args.batch_size
                 end_idx = min(num_val, (batch_idx + 1) * args.batch_size)
-                X = valX[start_idx: end_idx]
-                TE = valTE[start_idx: end_idx]
-                label = valY[start_idx: end_idx]
+                X = valX[start_idx: end_idx].to(device)
+                TE = valTE[start_idx: end_idx].to(device)
+                label = valY[start_idx: end_idx].to(device)
                 pred = model(X, TE)
                 pred = pred * std + mean
                 loss_batch = loss_criterion(pred, label)
