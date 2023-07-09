@@ -5,7 +5,9 @@ from model.model_ import *
 from utils.utils_ import load_data
 
 
-def train(model, args, log, loss_criterion, optimizer, scheduler):
+def train(device, model, args, log, loss_criterion, optimizer, scheduler):
+
+    model.to(device)
 
     (trainX, trainTE, trainY, valX, valTE, valY, testX, testTE,
      testY, SE, mean, std) = load_data(args)
@@ -39,9 +41,9 @@ def train(model, args, log, loss_criterion, optimizer, scheduler):
         for batch_idx in range(train_num_batch):
             start_idx = batch_idx * args.batch_size
             end_idx = min(num_train, (batch_idx + 1) * args.batch_size)
-            X = trainX[start_idx: end_idx]
-            TE = trainTE[start_idx: end_idx]
-            label = trainY[start_idx: end_idx]
+            X = trainX[start_idx: end_idx].to(device)
+            TE = trainTE[start_idx: end_idx].to(device)
+            label = trainY[start_idx: end_idx].to(device)
             optimizer.zero_grad()
             pred = model(X, TE)
             pred = pred * std + mean
