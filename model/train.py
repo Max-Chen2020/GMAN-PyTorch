@@ -12,6 +12,17 @@ def train(device, model, args, log, loss_criterion, optimizer, scheduler):
     (trainX, trainTE, trainY, valX, valTE, valY, testX, testTE,
      testY, SE, mean, std) = load_data(args)
 
+    trainX = trainX.to(device)
+    trainTE = trainTE.to(device)
+    trainY = trainY.to(device)
+    valX = valX.to(device)
+    valTE = valTE.to(device)
+    valY = valY.to(device)
+    testX = testX.to(device)
+    testTE = testTE.to(device)
+    testY = testY.to(device)
+    SE = SE.to(device)
+
     num_train, _, num_vertex = trainX.shape
     log_string(log, '**** training model ****')
     num_val = valX.shape[0]
@@ -31,9 +42,9 @@ def train(device, model, args, log, loss_criterion, optimizer, scheduler):
             break
         # shuffle
         permutation = torch.randperm(num_train)
-        trainX = trainX[permutation].to(device)
-        trainTE = trainTE[permutation].to(device)
-        trainY = trainY[permutation].to(device)
+        trainX = trainX[permutation]
+        trainTE = trainTE[permutation]
+        trainY = trainY[permutation]
         # train
         start_train = time.time()
         model.train()
@@ -68,9 +79,9 @@ def train(device, model, args, log, loss_criterion, optimizer, scheduler):
             for batch_idx in range(val_num_batch):
                 start_idx = batch_idx * args.batch_size
                 end_idx = min(num_val, (batch_idx + 1) * args.batch_size)
-                X = valX[start_idx: end_idx].to(device)
-                TE = valTE[start_idx: end_idx].to(device)
-                label = valY[start_idx: end_idx].to(device)
+                X = valX[start_idx: end_idx]
+                TE = valTE[start_idx: end_idx]
+                label = valY[start_idx: end_idx]
                 pred = model(X, TE)
                 pred = pred * std + mean
                 loss_batch = loss_criterion(pred, label)
