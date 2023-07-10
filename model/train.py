@@ -12,6 +12,7 @@ def train(device, model, args, log, loss_criterion, optimizer, scheduler):
     (trainX, trainTE, trainY, valX, valTE, valY, testX, testTE,
      testY, SE, mean, std) = load_data(args)
 
+    # move loaded data onto device
     trainX = trainX.to(device)
     trainTE = trainTE.to(device)
     trainY = trainY.to(device)
