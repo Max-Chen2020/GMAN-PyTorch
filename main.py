@@ -109,7 +109,7 @@ if __name__ == '__main__':
         np.savetxt('./figure/' + name[i] + '.txt', data, fmt='%s')
         
     # Plot the test prediction vs target（optional)
-    plt.figure(figsize=(12, 280))
+    fig = plt.figure(figsize=(12, 280))
     for k in range(193):
         plt.subplot(193, 1, k + 1)
         for j in range(len(testPred)):
@@ -119,5 +119,7 @@ if __name__ == '__main__':
                 d.append(testY[j, i, k])
             plt.plot(range(1 + j, 12 + 1 + j), c, c='b')
             plt.plot(range(1 + j, 12 + 1 + j), d, c='r')
-    plt.title('Test prediction vs Target')
+    fig.suptitle('Test prediction vs Target', fontsize = 14)
+    fig.tight_layout()
+    fig.subplots_adjust()
     plt.savefig('./figure/test_results.png')
