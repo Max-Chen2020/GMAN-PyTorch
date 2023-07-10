@@ -19,11 +19,11 @@ def metric(pred, label):
     mae = torch.abs(torch.sub(pred, label)).type(torch.float32)
     rmse = mae ** 2
     mape = mae / label
-    mae = torch.mean(mae)
+    mae = torch.nanmean(mae)
     rmse = rmse * mask
-    rmse = torch.sqrt(torch.mean(rmse))
+    rmse = torch.sqrt(torch.nanmean(rmse))
     mape = mape * mask
-    mape = torch.mean(mape)
+    mape = torch.nanmean(mape)
     return mae, rmse, mape
 
 
