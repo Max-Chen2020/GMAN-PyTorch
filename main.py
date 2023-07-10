@@ -14,7 +14,9 @@ from model.model_ import GMAN
 from model.train import train
 from model.test import test
 
+# add device
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--time_slot', type=int, default=15,
                     help='a time step is 15 mins')
@@ -81,9 +83,12 @@ log_string(log, 'trainable parameters: {:,}'.format(parameters))
 
 if __name__ == '__main__':
     start = time.time()
+
+    # add device variable to train and test functions
     loss_train, loss_val = train(device, model, args, log, loss_criterion, optimizer, scheduler)
     plot_train_val_loss(loss_train, loss_val, 'figure/train_val_loss.png')
     trainPred, valPred, testPred = test(device, args, log)
+  
     end = time.time()
     log_string(log, 'total time: %.1fmin' % ((end - start) / 60))
     log.close()
