@@ -38,7 +38,7 @@ parser.add_argument('--test_ratio', type=float, default=0.2,
                     help='testing set [default : 0.2]')
 parser.add_argument('--batch_size', type=int, default=32,
                     help='batch size')
-parser.add_argument('--max_epoch', type=int, default=1,
+parser.add_argument('--max_epoch', type=int, default=100,
                     help='epoch to run')
 parser.add_argument('--patience', type=int, default=10,
                     help='patience for early stop')
@@ -101,13 +101,15 @@ if __name__ == '__main__':
     testY_ = testY.numpy().reshape(-1, testY.shape[-1])
 
     # Save training, validation and testing datas to disk
-    l = [trainPred_, trainY_, valPred_, valY_, testPred_, testY_]
-    name = ['trainPred', 'trainY', 'valPred', 'valY', 'testPred', 'testY']
+    # l = [trainPred_, trainY_, valPred_, valY_, testPred_, testY_]
+    # name = ['trainPred', 'trainY', 'valPred', 'valY', 'testPred', 'testY']
+    l = [testPred_, testY_]
+    name = ['testPred', 'testY']
     for i, data in enumerate(l):
         np.savetxt('./figure/' + name[i] + '.txt', data, fmt='%s')
         
     # Plot the test prediction vs target（optional)
-    plt.figure(figsize=(10, 280))
+    plt.figure(figsize=(12, 280))
     for k in range(193):
         plt.subplot(193, 1, k + 1)
         for j in range(len(testPred)):
