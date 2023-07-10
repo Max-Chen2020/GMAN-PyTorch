@@ -51,7 +51,8 @@ def test(device, args, log):
             pred_batch = model(X, TE)
             trainPred.append(pred_batch.detach().clone())
             del X, TE, pred_batch
-        trainPred = torch.from_numpy(np.concatenate(trainPred, axis=0))
+        # trainPred = torch.from_numpy(np.concatenate(trainPred, axis=0))
+        trainPred = torch.cat(trainPred, dim=0)
         trainPred = trainPred * std + mean
 
         valPred = []
@@ -63,7 +64,8 @@ def test(device, args, log):
             pred_batch = model(X, TE)
             valPred.append(pred_batch.detach().clone())
             del X, TE, pred_batch
-        valPred = torch.from_numpy(np.concatenate(valPred, axis=0))
+        # valPred = torch.from_numpy(np.concatenate(valPred, axis=0))
+        valPred = torch.cat(valPred, dim=0)
         valPred = valPred * std + mean
 
         testPred = []
@@ -76,7 +78,8 @@ def test(device, args, log):
             pred_batch = model(X, TE)
             testPred.append(pred_batch.detach().clone())
             del X, TE, pred_batch
-        testPred = torch.from_numpy(np.concatenate(testPred, axis=0))
+        # testPred = torch.from_numpy(np.concatenate(testPred, axis=0))
+        testPred = torch.cat(testPred, dim=0)
         testPred = testPred* std + mean
     end_test = time.time()
     train_mae, train_rmse, train_mape = metric(trainPred, trainY)
@@ -99,9 +102,12 @@ def test(device, args, log):
         MAPE.append(mape)
         log_string(log, 'step: %02d         %.2f\t\t%.2f\t\t%.2f%%' %
                    (step + 1, mae, rmse, mape * 100))
-    average_mae = np.mean(MAE)
-    average_rmse = np.mean(RMSE)
-    average_mape = np.mean(MAPE)
+    # average_mae = np.mean(MAE)
+    # average_rmse = np.mean(RMSE)
+    # average_mape = np.mean(MAPE)
+    average_mae = torch.stack(MAE).mean()
+    average_rmse = torch.stack(RMSE).mean()
+    average_mape = torch.stack(MAPE).mean()
     log_string(
         log, 'average:         %.2f\t\t%.2f\t\t%.2f%%' %
              (average_mae, average_rmse, average_mape * 100))
