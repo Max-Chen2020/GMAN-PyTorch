@@ -71,7 +71,7 @@ del trainX, trainTE, valX, valTE, testX, testTE, mean, std
 # build model
 log_string(log, 'compiling model...')
 
-model = GMAN(SE, args, bn_decay=0.1)
+model = GMAN(SE.to(device), args, bn_decay=0.1)
 loss_criterion = nn.MSELoss()
 
 optimizer = optim.Adam(model.parameters(), args.learning_rate)
@@ -92,6 +92,7 @@ if __name__ == '__main__':
     end = time.time()
     log_string(log, 'total time: %.1fmin' % ((end - start) / 60))
     log.close()
+    trainPred, valPred, testPred = trainPred.cpu(), valPred.cpu(), testPred.cpu()
     trainPred_ = trainPred.numpy().reshape(-1, trainY.shape[-1])
     trainY_ = trainY.numpy().reshape(-1, trainY.shape[-1])
     valPred_ = valPred.numpy().reshape(-1, valY.shape[-1])
