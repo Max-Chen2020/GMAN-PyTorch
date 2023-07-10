@@ -9,6 +9,7 @@ def test(device, args, log):
     (trainX, trainTE, trainY, valX, valTE, valY, testX, testTE,
      testY, SE, mean, std) = load_data(args)
 
+    # move loaded data onto device
     trainX = trainX.to(device)
     trainTE = trainTE.to(device)
     trainY = trainY.to(device)
@@ -28,14 +29,16 @@ def test(device, args, log):
     test_num_batch = math.ceil(num_test / args.batch_size)
 
     model = torch.load(args.model_file)
-    
+
+    # load model onto device 
+    model.to(device)
 
     # test model
     log_string(log, '**** testing model ****')
     log_string(log, 'loading model from %s' % args.model_file)
     log_string(log, 'model restored!')
     log_string(log, 'evaluating...')
-    model.to(device)
+    
 
     with torch.no_grad():
 
