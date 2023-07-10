@@ -120,6 +120,5 @@ if __name__ == '__main__':
             plt.plot(range(1 + j, 12 + 1 + j), c, c='b')
             plt.plot(range(1 + j, 12 + 1 + j), d, c='r')
     fig.suptitle('Test prediction vs Target', fontsize = 14)
-    fig.tight_layout()
-    fig.subplots_adjust()
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95])
     plt.savefig('./figure/test_results.png')
