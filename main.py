@@ -18,8 +18,10 @@ from model.test import test
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--time_slot', type=int, default=15,
-                    help='a time step is 15 mins')
+parser.add_argument('--time_slot', type=int, default=5,
+                    help='a time step is 5 mins')
+parser.add_argument('--num_nodes', default=200,
+                    help='number of nodes')
 parser.add_argument('--num_his', type=int, default=12,
                     help='history steps')
 parser.add_argument('--num_pred', type=int, default=12,
@@ -46,11 +48,11 @@ parser.add_argument('--learning_rate', type=float, default=0.001,
                     help='initial learning rate')
 parser.add_argument('--decay_epoch', type=int, default=10,
                     help='decay epoch')
-parser.add_argument('--traffic_file', default='./data/flow_melb.h5',
+parser.add_argument('--traffic_file', default='./data/flow_pems.h5',
                     help='traffic file')
-parser.add_argument('--SE_file', default='./data/SE(Melb).txt',
+parser.add_argument('--SE_file', default='./data/SE(PeMS).txt',
                     help='spatial embedding file')
-parser.add_argument('--model_file', default='./data/GMAN.pkl',
+parser.add_argument('--model_file', default='./data/GMAN_pems_flow.pkl',
                     help='save the model to disk')
 parser.add_argument('--log_file', default='./data/log',
                     help='log file')
@@ -106,12 +108,13 @@ if __name__ == '__main__':
     l = [testPred_, testY_]
     name = ['testPred', 'testY']
     for i, data in enumerate(l):
-        np.savetxt('./figure/' + name[i] + '.txt', data, fmt='%s')
+        np.savetxt('./figure_pems/' + name[i] + '.txt', data, fmt='%s')
         
     # Plot the test prediction vs target（optional)
+    num_nodes = args.num_nodes
     fig = plt.figure(figsize=(12, 280))
-    for k in range(193):
-        plt.subplot(193, 1, k + 1)
+    for k in range(num_nodes):
+        plt.subplot(num_nodes, 1, k + 1)
         for j in range(len(testPred)):
             c, d = [], []
             for i in range(12):
@@ -121,4 +124,4 @@ if __name__ == '__main__':
             plt.plot(range(1 + j, 12 + 1 + j), d, c='r')
     fig.suptitle('Test prediction vs Target', fontsize = 14)
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])
-    plt.savefig('./figure/test_results.png')
+    plt.savefig('./figure_pems/test_results.png')
