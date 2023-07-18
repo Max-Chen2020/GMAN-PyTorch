@@ -40,10 +40,11 @@ def seq2instance(data, num_his, num_pred):
 
 def load_data(args):
     # Traffic
-    df = pd.read_hdf(args.traffic_file)
-    traffic = torch.from_numpy(df.values)
+    speed = pd.read_hdf(args.traffic_file, key = 'speed', mode = 'r')
+    flow = pd.read_hdf(args.traffic_file, key = 'flow', mode = 'r')
+    traffic = torch.from_numpy(speed.values)
     # train/val/test
-    num_step = df.shape[0]
+    num_step = speed.shape[0]
     train_steps = round(args.train_ratio * num_step)
     test_steps = round(args.test_ratio * num_step)
     val_steps = num_step - train_steps - test_steps
@@ -72,7 +73,7 @@ def load_data(args):
             SE[index] = torch.tensor([float(ch) for ch in temp[1:]])
 
     # temporal embedding
-    time = pd.DatetimeIndex(df.index)
+    time = pd.DatetimeIndex(speed.index)
     dayofweek = torch.reshape(torch.tensor(time.weekday), (-1, 1))
     timeofday = (time.hour * 3600 + time.minute * 60 + time.second) \
                 // (args.time_slot * 60)
