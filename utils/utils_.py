@@ -58,10 +58,13 @@ def load_data(args):
     valX, valY = seq2instance(val, args.num_his, args.num_pred)
     testX, testY = seq2instance(test, args.num_his, args.num_pred)
     # normalization
-    mean, std = torch.mean(trainX), torch.std(trainX)
-    trainX = (trainX - mean) / std
-    valX = (valX - mean) / std
-    testX = (testX - mean) / std
+    mean, std = torch.mean(trainX, dim = (0, 1, 2)), torch.std(trainX, dim = (0, 1, 2))
+    trainX[:, :, :, 0] = (trainX[:, :, :, 0] - mean[0]) / std[0]
+    trainX[:, :, :, 1] = (trainX[:, :, :, 1] - mean[1]) / std[1]
+    valX[:, :, :, 0] = (trainX[:, :, :, 0] - mean[0]) / std[0]
+    valX[:, :, :, 1] = (trainX[:, :, :, 1] - mean[1]) / std[1]
+    testX[:, :, :, 0] = (trainX[:, :, :, 0] - mean[0]) / std[0]
+    testX[:, :, :, 1] = (trainX[:, :, :, 1] - mean[1]) / std[1]
 
     # spatial embedding
     with open(args.SE_file, mode='r') as f:
