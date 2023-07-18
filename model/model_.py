@@ -65,7 +65,7 @@ class STEmbedding(nn.Module):
     TE:     [batch_size, num_his + num_pred, 2] (dayofweek, timeofday)
     T:      num of time steps in one day
     D:      output dims
-    retrun: [batch_size, num_his + num_pred, num_vertex, D]
+    return: [batch_size, num_his + num_pred, num_vertex, D]
     '''
 
     def __init__(self, D, bn_decay):
@@ -80,7 +80,7 @@ class STEmbedding(nn.Module):
 
     def forward(self, SE, TE, T=288):
         # spatial embedding
-        SE = SE.unsqueeze(0).unsqueeze(0)
+        SE = SE.unsqueeze(0).unsqueeze(0) # shape = (1, 1, num_vertex/dim, D) 
         SE = self.FC_se(SE)
         # temporal embedding
         dayofweek = torch.empty(TE.shape[0], TE.shape[1], 7).to(TE.device)
