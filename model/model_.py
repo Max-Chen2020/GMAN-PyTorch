@@ -24,13 +24,13 @@ class conv2d_(nn.Module):
 
 
     def forward(self, x):
-        x = x.permute(0, 4, 2, 3, 1) # shape = (num_sample, 1, dim, var, num_his)
-        x = F.pad(x, ([self.padding_size[1], self.padding_size[1], self.padding_size[0], self.padding_size[0], self.padding_size[0]]))
+        x = x.permute(0, 3, 2, 1) 
+        x = F.pad(x, ([self.padding_size[1], self.padding_size[1], self.padding_size[0], self.padding_size[0]]))
         x = self.conv(x)
         x = self.batch_norm(x)
         if self.activation is not None:
             x = F.relu_(x)
-        return x.permute(0, 4, 2, 3, 1)
+        return x.permute(0, 3, 2, 1)
 
 
 class FC(nn.Module):
@@ -341,7 +341,7 @@ class GMAN(nn.Module):
     def forward(self, X, TE):
 
         # input
-        X = torch.unsqueeze(X, -1) # shape = (num_sample, num_his, dim, var, 1)
+        # X = torch.unsqueeze(X, -1) # shape = (num_sample, num_his, dim, var, 1)
         X = self.FC_1(X)
         # STE
         STE = self.STEmbedding(self.SE, TE)
