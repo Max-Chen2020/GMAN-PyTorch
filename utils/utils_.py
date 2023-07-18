@@ -28,10 +28,11 @@ def metric(pred, label):
 
 
 def seq2instance(data, num_his, num_pred):
-    num_step, dims = data.shape
+    # add traffic variable dimension 
+    num_step, dims, vars = data.shape
     num_sample = num_step - num_his - num_pred + 1
-    x = torch.zeros(num_sample, num_his, dims)
-    y = torch.zeros(num_sample, num_pred, dims)
+    x = torch.zeros(num_sample, num_his, dims, vars)
+    y = torch.zeros(num_sample, num_pred, dims, vars)
     for i in range(num_sample):
         x[i] = data[i: i + num_his]
         y[i] = data[i + num_his: i + num_his + num_pred]
