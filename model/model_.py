@@ -359,4 +359,4 @@ class GMAN(nn.Module):
         # output
         X = self.FC_2(X)
         del STE, STE_his, STE_pred
-        return torch.squeeze(X, 3)
+        return torch.squeeze(X, 3) # shape = (num_sample, num_his, dim, var)
