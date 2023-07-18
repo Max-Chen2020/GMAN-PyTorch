@@ -85,8 +85,8 @@ def load_data(args):
                 // (args.time_slot * 60)
     timeofday = torch.reshape(torch.tensor(timeofday), (-1, 1))
     time = torch.cat((dayofweek, timeofday), -1)
-    time = torch.reshape(time, (-1, 2, 1))
-    time = torch.cat((time, time), -1)
+    # time = torch.reshape(time, (-1, 2, 1))
+    # time = torch.cat((time, time), -1)
     # shape = (num_sample, 2, 2)
     
     # train/val/test
