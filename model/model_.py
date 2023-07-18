@@ -341,7 +341,7 @@ class GMAN(nn.Module):
     def forward(self, X, TE):
 
         # input
-        X = torch.unsqueeze(X, -1)
+        X = torch.unsqueeze(X, -1) # shape = (num_sample, num_his, dim, var, 1)
         X = self.FC_1(X)
         # STE
         STE = self.STEmbedding(self.SE, TE)
