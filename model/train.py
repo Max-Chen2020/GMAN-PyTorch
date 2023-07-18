@@ -24,7 +24,7 @@ def train(device, model, args, log, loss_criterion, optimizer, scheduler):
     testY = testY.to(device)
     SE = SE.to(device)
 
-    num_train, _, num_vertex = trainX.shape
+    num_train, _, _, _ = trainX.shape
     log_string(log, '**** training model ****')
     num_val = valX.shape[0]
     train_num_batch = math.ceil(num_train / args.batch_size)
