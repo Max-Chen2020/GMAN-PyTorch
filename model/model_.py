@@ -24,13 +24,13 @@ class conv2d_(nn.Module):
 
 
     def forward(self, x):
-        x = x.permute(0, 3, 2, 1, 4)
-        x = F.pad(x, ([self.padding_size[1], self.padding_size[1], self.padding_size[0], self.padding_size[0]]))
+        x = x.permute(0, 4, 2, 3, 1) # shape = (num_sample, 1, dim, var, num_his)
+        x = F.pad(x, ([self.padding_size[1], self.padding_size[1], self.padding_size[0], self.padding_size[0], self.padding_size[0]]))
         x = self.conv(x)
         x = self.batch_norm(x)
         if self.activation is not None:
             x = F.relu_(x)
-        return x.permute(0, 3, 2, 1, 4)
+        return x.permute(0, 4, 2, 3, 1)
 
 
 class FC(nn.Module):
