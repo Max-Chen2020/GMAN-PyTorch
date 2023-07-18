@@ -80,7 +80,7 @@ def test(device, args, log):
             pred_batch = model(X, TE)
             testPred.append(pred_batch.detach().clone())
             del X, TE, pred_batch
-        # testPred = torch.from_numpy(np.concatenate(testPred, axis=0))
+
         testPred = torch.cat(testPred, dim=0)
         testPred[:, :, :, 0] = testPred[:, :, :, 0] * std[0] + mean[0]
         testPred[:, :, :, 1] = testPred[:, :, :, 1] * std[1] + mean[1]
@@ -106,9 +106,7 @@ def test(device, args, log):
         MAPE.append(mape)
         log_string(log, 'step: %02d         %.2f\t\t%.2f\t\t%.2f%%' %
                    (step + 1, mae, rmse, mape * 100))
-    # average_mae = np.mean(MAE)
-    # average_rmse = np.mean(RMSE)
-    # average_mape = np.mean(MAPE)
+
     average_mae = torch.stack(MAE).mean()
     average_rmse = torch.stack(RMSE).mean()
     average_mape = torch.stack(MAPE).mean()
