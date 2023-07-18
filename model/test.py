@@ -21,7 +21,7 @@ def test(device, args, log):
     testY = testY.to(device)
     SE = SE.to(device)
     
-    num_train, _, num_vertex = trainX.shape
+    num_train, _, _, _ = trainX.shape
     num_val = valX.shape[0]
     num_test = testX.shape[0]
     train_num_batch = math.ceil(num_train / args.batch_size)
