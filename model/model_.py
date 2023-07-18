@@ -31,7 +31,7 @@ class conv2d_(nn.Module):
         x = self.batch_norm(x)
         if self.activation is not None:
             x = F.relu_(x)
-        return x.permute(0, 3, 2, 1)
+        return x.permute(0, 3, 2, 1) # shape = (num_sample, num_his?, dim?, D)
 
 
 class FC(nn.Module):
