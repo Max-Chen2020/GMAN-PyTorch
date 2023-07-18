@@ -61,10 +61,10 @@ def load_data(args):
     mean, std = torch.mean(trainX, dim = (0, 1, 2)), torch.std(trainX, dim = (0, 1, 2))
     trainX[:, :, :, 0] = (trainX[:, :, :, 0] - mean[0]) / std[0]
     trainX[:, :, :, 1] = (trainX[:, :, :, 1] - mean[1]) / std[1]
-    valX[:, :, :, 0] = (trainX[:, :, :, 0] - mean[0]) / std[0]
-    valX[:, :, :, 1] = (trainX[:, :, :, 1] - mean[1]) / std[1]
-    testX[:, :, :, 0] = (trainX[:, :, :, 0] - mean[0]) / std[0]
-    testX[:, :, :, 1] = (trainX[:, :, :, 1] - mean[1]) / std[1]
+    valX[:, :, :, 0] = (valX[:, :, :, 0] - mean[0]) / std[0]
+    valX[:, :, :, 1] = (valX[:, :, :, 1] - mean[1]) / std[1]
+    testX[:, :, :, 0] = (testX[:, :, :, 0] - mean[0]) / std[0]
+    testX[:, :, :, 1] = (testX[:, :, :, 1] - mean[1]) / std[1]
 
     # spatial embedding
     with open(args.SE_file, mode='r') as f:
