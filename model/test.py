@@ -53,7 +53,8 @@ def test(device, args, log):
             del X, TE, pred_batch
         # trainPred = torch.from_numpy(np.concatenate(trainPred, axis=0))
         trainPred = torch.cat(trainPred, dim=0)
-        trainPred = trainPred * std + mean
+        trainPred[:, :, :, 0] = trainPred[:, :, :, 0] * std[0] + mean[0]
+        trainPred[:, :, :, 1] = trainPred[:, :, :, 1] * std[1] + mean[1]
 
         valPred = []
         for batch_idx in range(val_num_batch):
@@ -66,7 +67,8 @@ def test(device, args, log):
             del X, TE, pred_batch
         # valPred = torch.from_numpy(np.concatenate(valPred, axis=0))
         valPred = torch.cat(valPred, dim=0)
-        valPred = valPred * std + mean
+        valPred[:, :, :, 0] = valPred[:, :, :, 0] * std[0] + mean[0]
+        valPred[:, :, :, 1] = valPred[:, :, :, 1] * std[1] + mean[1]
 
         testPred = []
         start_test = time.time()
@@ -80,7 +82,9 @@ def test(device, args, log):
             del X, TE, pred_batch
         # testPred = torch.from_numpy(np.concatenate(testPred, axis=0))
         testPred = torch.cat(testPred, dim=0)
-        testPred = testPred* std + mean
+        testPred[:, :, :, 0] = testPred[:, :, :, 0] * std[0] + mean[0]
+        testPred[:, :, :, 1] = testPred[:, :, :, 1] * std[1] + mean[1]
+        
     end_test = time.time()
     train_mae, train_rmse, train_mape = metric(trainPred, trainY)
     val_mae, val_rmse, val_mape = metric(valPred, valY)
