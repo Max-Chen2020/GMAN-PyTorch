@@ -89,8 +89,8 @@ if __name__ == '__main__':
     start = time.time()
 
     # add device variable to train and test functions
-    loss_train, loss_val = train(device, model, args, log, loss_criterion, optimizer, scheduler)
-    # plot_train_val_loss(loss_train, loss_val, 'figure/train_val_loss.png')
+    dl_loss_train, phy_loss_train, dl_loss_val, phy_loss_val = train(device, model, args, log, loss_criterion, optimizer, scheduler)
+    plot_train_val_loss(dl_loss_train, phy_loss_train, dl_loss_val, phy_loss_val, 'figure/train_val_loss.png')
     trainPred, valPred, testPred = test(device, args, log)
   
     end = time.time()
