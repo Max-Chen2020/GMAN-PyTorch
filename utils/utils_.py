@@ -144,7 +144,7 @@ def physical_loss(pred, label):
     v_f = 60
 
     # merge and recover shape, apply mask
-    loss = torch.stack((torch.sub(v, v_f), torch.sub(q, v_f)), axis = -1)
+    loss = torch.stack((torch.square(q / v_f - k), torch.square(v_f * k - q)), axis = -1)
     loss = torch.multiply(loss, mask)
     loss = torch.nanmean(loss)
     return loss 
@@ -152,7 +152,7 @@ def physical_loss(pred, label):
 # Weighted total loss
 def wt_loss(pred, label, alpha = 0.5):
     dl_loss = torch.nn.MSELoss()
-    return (1 - alpha) * dl_loss(pred, label) + alpha * physical_loss(pred, label)
+    return (1 - alpha) * dl_loss(pred, label), alpha * physical_loss(pred, label)
     
 
 
