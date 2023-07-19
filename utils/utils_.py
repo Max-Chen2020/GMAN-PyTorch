@@ -171,15 +171,18 @@ def mae_loss(pred, label):
 
 # plot train_val_loss
 def plot_train_val_loss(train_dl_loss, train_phy_loss, val_dl_loss, val_phy_loss, file_path):
-    plt.figure(figsize=(10, 5))
-    plt.plot(range(1, len(train_dl_loss) + 1), train_dl_loss, c='b', marker='s', label='Train DL')
-    plt.plot(range(1, len(val_dl_loss) + 1), val_dl_loss, c='r', marker='o', label='Val DL')
-    plt.plot(range(1, len(train_phy_loss) + 1), train_phy_loss, c='cyan', marker='s', label='Train PHY')
-    plt.plot(range(1, len(val_phy_loss) + 1), val_phy_loss, c='purple', marker='o', label='Val PHY')
-    plt.legend(loc='best')
-    plt.title('Train loss vs Validation loss')
-    plt.savefig(file_path)
-
+    fig = plt.figure(figsize=(12, 12))
+    ax1 = fig.add_subplot(2, 1, 1)
+    ax1.plot(range(1, len(train_dl_loss) + 1), train_dl_loss, c='b', marker='s', label='Train DL')
+    ax1.plot(range(1, len(val_dl_loss) + 1), val_dl_loss, c='r', marker='o', label='Val DL')
+    ax1.set_title('Train loss vs Validation loss (DL)')
+    ax1.legend(loc='best')
+    ax2 = fig.add_subplot(2, 1, 2)
+    ax2.plot(range(1, len(train_phy_loss) + 1), train_phy_loss, c='b', marker='s', label='Train PHY')
+    ax2.plot(range(1, len(val_phy_loss) + 1), val_phy_loss, c='r', marker='o', label='Val PHY')
+    ax2.set_title('Train loss vs Validation loss (PHY)')
+    ax2.legend(loc='best')
+    fig.savefig(file_path)
 
 # plot test results
 def save_test_result(trainPred, trainY, valPred, valY, testPred, testY):
