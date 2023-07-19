@@ -127,7 +127,7 @@ class dataset(Dataset):
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
-# Customised loss
+# Physics-informed loss
 def physical_loss(pred, label):
 
     # filtering 0s and nans, recalculate weights 
@@ -142,8 +142,15 @@ def physical_loss(pred, label):
 
     # parameters: free flow speed, critical density and backward wave speed
     v_f = 60
-    k_c = 120
-    v_b = 40
+    loss = torch.sub(v, v_f)
+    loss *= mask
+    loss = torch.where(torch.isnan(loss), torch.tensor(0.0), loss)
+    return loss 
+
+# Weighted total loss
+def wt_loss(pred, label, alpha = 0.5):
+    return torch.add(torch.nn.MSELoss(pred, label), physical_loss(pred, label), alpha)
+    
 
 
 # The following function can be replaced by 'loss = torch.nn.L1Loss()  loss_out = loss(pred, target)
