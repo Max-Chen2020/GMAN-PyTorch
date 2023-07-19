@@ -76,7 +76,7 @@ log_string(log, 'compiling model...')
 
 model = GMAN(SE.to(device), args, bn_decay=0.1)
 # loss_criterion = nn.MSELoss()
-loss_criterion = wt_loss()
+loss_criterion = wt_loss
 
 optimizer = optim.Adam(model.parameters(), args.learning_rate)
 scheduler = optim.lr_scheduler.StepLR(optimizer,
