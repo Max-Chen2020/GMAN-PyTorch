@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from utils.utils_ import log_string, plot_train_val_loss
-from utils.utils_ import count_parameters, load_data
+from utils.utils_ import count_parameters, load_data, wt_loss
 
 from model.model_ import GMAN
 from model.train import train
@@ -75,7 +75,8 @@ del trainX, trainTE, valX, valTE, testX, testTE, mean, std
 log_string(log, 'compiling model...')
 
 model = GMAN(SE.to(device), args, bn_decay=0.1)
-loss_criterion = nn.MSELoss()
+# loss_criterion = nn.MSELoss()
+loss_criterion = wt_loss()
 
 optimizer = optim.Adam(model.parameters(), args.learning_rate)
 scheduler = optim.lr_scheduler.StepLR(optimizer,
