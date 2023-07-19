@@ -52,6 +52,8 @@ def train(device, model, args, log, loss_criterion, optimizer, scheduler):
         start_train = time.time()
         model.train()
         train_loss = 0
+        dl = 0
+        phy = 0
         for batch_idx in range(train_num_batch):
             start_idx = batch_idx * args.batch_size
             end_idx = min(num_train, (batch_idx + 1) * args.batch_size)
@@ -65,6 +67,8 @@ def train(device, model, args, log, loss_criterion, optimizer, scheduler):
             dl_loss, phy_loss = loss_criterion(pred, label)
             loss_batch = dl_loss + phy_loss
             train_loss += float(loss_batch) * (end_idx - start_idx)
+            dl += float(dl_loss) * (end_idx - start_idx)
+            phy += float(phy_loss) * (end_idx - start_idx)
             loss_batch.backward()
             optimizer.step()
             if torch.cuda.is_available():
@@ -73,13 +77,15 @@ def train(device, model, args, log, loss_criterion, optimizer, scheduler):
                 print(f'Training batch: {batch_idx+1} in epoch:{epoch}, training batch loss:{loss_batch:.4f}')
             del X, TE, label, pred, loss_batch
         train_loss /= num_train
-        train_dl_loss.append(dl_loss)
-        train_phy_loss.append(phy_loss)
+        train_dl_loss.append(dl)
+        train_phy_loss.append(phy)
         end_train = time.time()
 
         # val loss
         start_val = time.time()
         val_loss = 0
+        dl = 0
+        phy = 0
         model.eval()
         with torch.no_grad():
             for batch_idx in range(val_num_batch):
@@ -94,10 +100,12 @@ def train(device, model, args, log, loss_criterion, optimizer, scheduler):
                 dl_loss, phy_loss = loss_criterion(pred, label)
                 loss_batch = dl_loss + phy_loss
                 val_loss += float(loss_batch) * (end_idx - start_idx)
+                dl += float(dl_loss) * (end_idx - start_idx)
+                phy += float(phy_loss) * (end_idx - start_idx)
                 del X, TE, label, pred, loss_batch
         val_loss /= num_val
-        val_dl_loss.append(dl_loss)
-        val_phy_loss.append(phy_loss)
+        val_dl_loss.append(dl)
+        val_phy_loss.append(phy)
         end_val = time.time()
         log_string(
             log,
