@@ -129,6 +129,19 @@ class dataset(Dataset):
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
+# Customised loss
+def physical_loss(pred, label):
+
+    # filtering 0s and nans, recalculate weights 
+    mask = torch.ne(label, 0).type(torch.float32)
+    mask /= torch.mean(mask)
+    mask = torch.where(torch.isnan(mask), torch.tensor(0.0), mask)
+
+    # extract traffic varialbes: v for speed, q for flow and k for density 
+    v = pred[:, :, :, 0]
+    q = pred[:, :, :, 1]
+    k = torch.div(q, v)
+
 
 # The following function can be replaced by 'loss = torch.nn.L1Loss()  loss_out = loss(pred, target)
 def mae_loss(pred, label):
