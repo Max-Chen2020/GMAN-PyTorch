@@ -51,7 +51,7 @@ def test(device, args, log):
             pred_batch = model(X, TE)
             trainPred.append(pred_batch.detach().clone())
             del X, TE, pred_batch
-        # trainPred = torch.from_numpy(np.concatenate(trainPred, axis=0))
+
         trainPred = torch.cat(trainPred, dim=0)
         trainPred[:, :, :, 0] = trainPred[:, :, :, 0] * std[0] + mean[0]
         trainPred[:, :, :, 1] = trainPred[:, :, :, 1] * std[1] + mean[1]
@@ -86,9 +86,9 @@ def test(device, args, log):
         testPred[:, :, :, 1] = testPred[:, :, :, 1] * std[1] + mean[1]
         
     end_test = time.time()
-    train_mae, train_rmse, train_mape = metric(trainPred, trainY)
-    val_mae, val_rmse, val_mape = metric(valPred, valY)
-    test_mae, test_rmse, test_mape = metric(testPred, testY)
+    train_mae, train_rmse, train_mape = metric(trainPred[:, :, :, 0], trainY[:, :, :, 0])
+    val_mae, val_rmse, val_mape = metric(valPred[:, :, :, 0], valY[:, :, :, 0])
+    test_mae, test_rmse, test_mape = metric(testPred[:, :, :, 0], testY[:, :, :, 0])
     log_string(log, 'testing time: %.1fs' % (end_test - start_test))
     log_string(log, '                MAE\t\tRMSE\t\tMAPE')
     log_string(log, 'train            %.2f\t\t%.2f\t\t%.2f%%' %
@@ -100,7 +100,7 @@ def test(device, args, log):
     log_string(log, 'performance in each prediction step')
     MAE, RMSE, MAPE = [], [], []
     for step in range(args.num_pred):
-        mae, rmse, mape = metric(testPred[:, step], testY[:, step])
+        mae, rmse, mape = metric(testPred[:, step, :, 0], testY[:, step, :, 0])
         MAE.append(mae)
         RMSE.append(rmse)
         MAPE.append(mape)
