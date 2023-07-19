@@ -170,10 +170,12 @@ def mae_loss(pred, label):
 
 
 # plot train_val_loss
-def plot_train_val_loss(train_total_loss, val_total_loss, file_path):
+def plot_train_val_loss(train_dl_loss, train_phy_loss, val_dl_loss, val_phy_loss, file_path):
     plt.figure(figsize=(10, 5))
-    plt.plot(range(1, len(train_total_loss) + 1), train_total_loss, c='b', marker='s', label='Train')
-    plt.plot(range(1, len(val_total_loss) + 1), val_total_loss, c='r', marker='o', label='Validation')
+    plt.plot(range(1, len(train_dl_loss) + 1), train_dl_loss, c='b', marker='s', label='Train DL')
+    plt.plot(range(1, len(val_dl_loss) + 1), val_dl_loss, c='r', marker='o', label='Val DL')
+    plt.plot(range(1, len(train_phy_loss) + 1), train_phy_loss, c='cyan', marker='s', label='Train PHY')
+    plt.plot(range(1, len(val_phy_loss) + 1), val_phy_loss, c='purple', marker='o', label='Val PHY')
     plt.legend(loc='best')
     plt.title('Train loss vs Validation loss')
     plt.savefig(file_path)
