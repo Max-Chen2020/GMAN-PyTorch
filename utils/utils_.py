@@ -91,9 +91,7 @@ def load_data(args):
                 // (args.time_slot * 60)
     timeofday = torch.reshape(torch.tensor(timeofday), (-1, 1))
     time = torch.cat((dayofweek, timeofday), -1)
-    # time = torch.reshape(time, (-1, 2, 1))
-    # time = torch.cat((time, time), -1)
-    # shape = (num_sample, 2, 2)
+    # shape = (num_sample, 2)
     
     # train/val/test
     train = time[: train_steps]
@@ -141,6 +139,11 @@ def physical_loss(pred, label):
     v = pred[:, :, :, 0]
     q = pred[:, :, :, 1]
     k = torch.div(q, v)
+
+    # parameters: free flow speed, critical density and backward wave speed
+    v_f = 60
+    k_c = 120
+    v_b = 40
 
 
 # The following function can be replaced by 'loss = torch.nn.L1Loss()  loss_out = loss(pred, target)
