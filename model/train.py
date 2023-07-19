@@ -77,6 +77,8 @@ def train(device, model, args, log, loss_criterion, optimizer, scheduler):
                 print(f'Training batch: {batch_idx+1} in epoch:{epoch}, training batch loss:{loss_batch:.4f}')
             del X, TE, label, pred, loss_batch
         train_loss /= num_train
+        dl /= num_train
+        phy /= num_train
         train_dl_loss.append(dl)
         train_phy_loss.append(phy)
         end_train = time.time()
@@ -84,8 +86,8 @@ def train(device, model, args, log, loss_criterion, optimizer, scheduler):
         # val loss
         start_val = time.time()
         val_loss = 0
-        dl = 0
-        phy = 0
+        dl_ = 0
+        phy_ = 0
         model.eval()
         with torch.no_grad():
             for batch_idx in range(val_num_batch):
@@ -100,12 +102,14 @@ def train(device, model, args, log, loss_criterion, optimizer, scheduler):
                 dl_loss, phy_loss = loss_criterion(pred, label)
                 loss_batch = dl_loss + phy_loss
                 val_loss += float(loss_batch) * (end_idx - start_idx)
-                dl += float(dl_loss) * (end_idx - start_idx)
-                phy += float(phy_loss) * (end_idx - start_idx)
+                dl_ += float(dl_loss) * (end_idx - start_idx)
+                phy_ += float(phy_loss) * (end_idx - start_idx)
                 del X, TE, label, pred, loss_batch
         val_loss /= num_val
-        val_dl_loss.append(dl)
-        val_phy_loss.append(phy)
+        dl_ /= num_val
+        phy_ /= num_val
+        val_dl_loss.append(dl_)
+        val_phy_loss.append(phy_)
         end_val = time.time()
         log_string(
             log,
