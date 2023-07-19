@@ -33,8 +33,10 @@ def train(device, model, args, log, loss_criterion, optimizer, scheduler):
     wait = 0
     val_loss_min = float('inf')
     best_model_wts = None
-    train_total_loss = []
-    val_total_loss = []
+    train_dl_loss = []
+    val_dl_loss = []
+    train_phy_loss = []
+    val_phy_loss = []
 
     # Train & validation
     for epoch in range(args.max_epoch):
@@ -60,7 +62,8 @@ def train(device, model, args, log, loss_criterion, optimizer, scheduler):
             pred = model(X, TE)
             pred[:, :, :, 0] = pred[:, :, :, 0] * std[0] + mean[0]
             pred[:, :, :, 1] = pred[:, :, :, 1] * std[1] + mean[1]
-            loss_batch = loss_criterion(pred, label)
+            dl_loss, phy_loss = loss_criterion(pred, label)
+            loss_batch = dl_loss + phy_loss
             train_loss += float(loss_batch) * (end_idx - start_idx)
             loss_batch.backward()
             optimizer.step()
@@ -70,7 +73,8 @@ def train(device, model, args, log, loss_criterion, optimizer, scheduler):
                 print(f'Training batch: {batch_idx+1} in epoch:{epoch}, training batch loss:{loss_batch:.4f}')
             del X, TE, label, pred, loss_batch
         train_loss /= num_train
-        train_total_loss.append(train_loss)
+        train_dl_loss.append(dl_loss)
+        train_phy_loss.append(phy_loss)
         end_train = time.time()
 
         # val loss
@@ -87,11 +91,13 @@ def train(device, model, args, log, loss_criterion, optimizer, scheduler):
                 pred = model(X, TE)
                 pred[:, :, :, 0] = pred[:, :, :, 0] * std[0] + mean[0]
                 pred[:, :, :, 1] = pred[:, :, :, 1] * std[1] + mean[1]
-                loss_batch = loss_criterion(pred, label)
+                dl_loss, phy_loss = loss_criterion(pred, label)
+                loss_batch = dl_loss + phy_loss
                 val_loss += float(loss_batch) * (end_idx - start_idx)
                 del X, TE, label, pred, loss_batch
         val_loss /= num_val
-        val_total_loss.append(val_loss)
+        val_dl_loss.append(dl_loss)
+        val_phy_loss.append(phy_loss)
         end_val = time.time()
         log_string(
             log,
@@ -114,4 +120,4 @@ def train(device, model, args, log, loss_criterion, optimizer, scheduler):
     model.load_state_dict(best_model_wts)
     torch.save(model, args.model_file)
     log_string(log, f'Training and validation are completed, and model has been stored as {args.model_file}')
-    return train_total_loss, val_total_loss
+    return train_dl_loss, train_phy_loss, val_dl_loss, val_phy_loss
