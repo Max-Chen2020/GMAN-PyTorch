@@ -142,14 +142,17 @@ def physical_loss(pred, label):
 
     # parameters: free flow speed, critical density and backward wave speed
     v_f = 60
-    loss = torch.sub(v, v_f)
-    loss *= mask
-    loss = torch.where(torch.isnan(loss), torch.tensor(0.0), loss)
+
+    # merge and recover shape, apply mask
+    loss = torch.stack((torch.sub(v, v_f), torch.sub(q, v_f)), axis = -1)
+    loss = torch.multiply(loss, mask)
+    loss = torch.nanmean(loss)
     return loss 
 
 # Weighted total loss
 def wt_loss(pred, label, alpha = 0.5):
-    return torch.add(torch.nn.MSELoss(pred, label), physical_loss(pred, label), alpha)
+    dl_loss = torch.nn.MSELoss()
+    return (1 - alpha) * dl_loss(pred, label) + alpha * physical_loss(pred, label)
     
 
 
