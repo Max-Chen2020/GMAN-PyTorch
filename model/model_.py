@@ -310,7 +310,8 @@ class transformAttention(nn.Module):
 class GMAN(nn.Module):
     '''
     GMAN
-        X：       [batch_size, num_his, num_vertx]
+        X：       [batch_size, num_his, num_vertx, num_var]
+        PE:       [batch_size, num_his + num_pred, 2] (speed, flow)
         TE：      [batch_size, num_his + num_pred, 2] (time-of-day, day-of-week)
         SE：      [num_vertex, K * d]
         num_his： number of history steps
@@ -319,7 +320,7 @@ class GMAN(nn.Module):
         L：       number of STAtt blocks in the encoder/decoder
         K：       number of attention heads
         d：       dimension of each attention head outputs
-        return：  [batch_size, num_pred, num_vertex]
+        return：  [batch_size, num_pred, num_vertex, num_var]
     '''
 
     def __init__(self, SE, args, bn_decay):
@@ -342,7 +343,7 @@ class GMAN(nn.Module):
     def forward(self, X, TE):
 
         # input
-        # X = torch.unsqueeze(X, -1) # shape = (num_sample, num_his, dim, var, 1)
+        # X = torch.unsqueeze(X, -1) # shape = (num_sample, num_his, dim, var)
         X = self.FC_1(X)
         # STE
         STE = self.STEmbedding(self.SE, TE)
