@@ -311,7 +311,6 @@ class GMAN(nn.Module):
     '''
     GMAN
         X：       [batch_size, num_his, num_vertx, num_var]
-        PE:       [batch_size, num_his + num_pred, 2] (speed, flow)
         TE：      [batch_size, num_his + num_pred, 2] (time-of-day, day-of-week)
         SE：      [num_vertex, K * d]
         num_his： number of history steps
