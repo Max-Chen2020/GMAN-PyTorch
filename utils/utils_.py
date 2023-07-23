@@ -82,7 +82,7 @@ def load_data(args):
         for line in lines[1:]:
             temp = line.split(' ')
             index = int(temp[0])
-            SE[index] = torch.tensor([float(ch) for ch in temp[1:]])
+            SE[index] = torch.tensor([float(ch) for ch in temp[1:]]) # shape = (num_vertex, 64/D)
 
     # temporal embedding
     time = pd.DatetimeIndex(speed.index)
@@ -91,9 +91,7 @@ def load_data(args):
                 // (args.time_slot * 60)
     timeofday = torch.reshape(torch.tensor(timeofday), (-1, 1))
     time = torch.cat((dayofweek, timeofday), -1)
-    # time = torch.reshape(time, (-1, 2, 1))
-    # time = torch.cat((time, time), -1)
-    # shape = (num_sample, 2, 2)
+    # shape = (num_sample, 2)
     
     # train/val/test
     train = time[: train_steps]
