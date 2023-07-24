@@ -141,10 +141,11 @@ def physical_loss(pred, label):
     k = torch.div(q, v)
 
     # parameters: free flow speed, critical density and backward wave speed
-    v_f = 60
+    v_f = 70
+    k_j = 18
 
     # merge and recover shape, apply mask
-    loss = torch.stack((torch.square(q / v_f - k), torch.square(v_f * k - q)), axis = -1)
+    loss = torch.stack((torch.square(v_f * (1 - k / k_j) - v), torch.square(v_f * k * (1 - k / k_j) - q)), axis = -1)
     loss = torch.multiply(loss, mask)
     loss = torch.nanmean(loss)
     return loss 
