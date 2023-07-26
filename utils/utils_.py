@@ -65,7 +65,7 @@ def load_data(args):
     valX, valY = seq2instance(val, args.num_his, args.num_pred)
     testX, testY = seq2instance(test, args.num_his, args.num_pred)
     # normalization
-    mean, std = torch.mean(trainX, dim = (0, 1, 2)), torch.std(trainX, dim = (0, 1, 2))
+    mean, std = torch.std_mean(trainX, dim = (0, 1, 2))
     trainX[:, :, :, 0] = (trainX[:, :, :, 0] - mean[0]) / std[0]
     trainX[:, :, :, 1] = (trainX[:, :, :, 1] - mean[1]) / std[1]
     valX[:, :, :, 0] = (valX[:, :, :, 0] - mean[0]) / std[0]
