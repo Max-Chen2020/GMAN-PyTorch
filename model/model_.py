@@ -313,6 +313,12 @@ class phyAttention(nn.Module):
     return:    [batch_size, num_pred, num_vertex, 2]
     '''
 
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, X):
+        return 
+
 
 class GMAN(nn.Module):
     '''
