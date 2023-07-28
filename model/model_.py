@@ -85,6 +85,29 @@ class FC(nn.Module):
             x = conv(x)
         return x
 
+class FC_(nn.Module):
+    def __init__(self, input_dims, units, activations, bn_decay, use_bias=True):
+        super().__init__()
+        if isinstance(units, int):
+            units = [units]
+            input_dims = [input_dims]
+            activations = [activations]
+        elif isinstance(units, tuple):
+            units = list(units)
+            input_dims = list(input_dims)
+            activations = list(activations)
+        assert type(units) == list
+        self.convs = nn.ModuleList([conv3d_(
+            input_dims=input_dim, output_dims=num_unit, kernel_size=[1, 1, 1], stride=[1, 1, 1],
+            padding='VALID', use_bias=use_bias, activation=activation,
+            bn_decay=bn_decay) for input_dim, num_unit, activation in
+            zip(input_dims, units, activations)])
+
+    def forward(self, x):
+        for conv in self.convs:
+            x = conv(x)
+        return x
+
 
 class STEmbedding(nn.Module):
     '''
