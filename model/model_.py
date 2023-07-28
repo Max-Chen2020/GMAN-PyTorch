@@ -431,6 +431,10 @@ class GMAN(nn.Module):
                        bn_decay=bn_decay)
         self.FC_2 = FC(input_dims=[D, D], units=[D, 1], activations=[F.relu, None],
                        bn_decay=bn_decay)
+        self.FC_3 = FC_(input_dims=[1, D], units=[D, D], activations=[F.relu, None],
+                       bn_decay=bn_decay)
+        self.FC_4 = FC_(input_dims=[D, D], units=[D, 1], activations=[F.relu, None],
+                       bn_decay=bn_decay)
 
     def forward(self, X, TE):
 
