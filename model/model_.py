@@ -371,9 +371,9 @@ class phyAttention(nn.Module):
         self.K = K
         self.FC_q = FC_(input_dims=1, units=D, activations=F.relu,
                        bn_decay=bn_decay)
-        self.FC_k = FC_(input_dims=D, units=D, activations=F.relu,
+        self.FC_k = FC_(input_dims=1, units=D, activations=F.relu,
                        bn_decay=bn_decay)
-        self.FC_v = FC_(input_dims=D, units=D, activations=F.relu,
+        self.FC_v = FC_(input_dims=1, units=D, activations=F.relu,
                        bn_decay=bn_decay)
         self.FC = FC_(input_dims=D, units=D, activations=F.relu,
                      bn_decay=bn_decay)
@@ -389,7 +389,7 @@ class phyAttention(nn.Module):
         key = torch.cat(torch.split(key, self.K, dim=-1), dim=0)
         value = torch.cat(torch.split(value, self.K, dim=-1), dim=0)
         # [K * batch_size, num_step, num_vertex, num_vertex]
-        attention = torch.matmul(query, key.transpose(2, 3))
+        attention = torch.matmul(query, key.transpose(3, 4))
         attention /= (self.d ** 0.5)
         attention = F.softmax(attention, dim=-1)
         # [batch_size, num_step, num_vertex, D]
