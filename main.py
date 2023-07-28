@@ -99,5 +99,5 @@ if __name__ == '__main__':
     testPred = testPred.cpu()
     lst = [testPred, testY]
     name = ['testPred', 'testY']
-    for i, data in enumerate(l):
-        np.save('./figure/' + name[i] + '.npy', data)   
+    for i, data in enumerate(lst):
+        torch.save('./figure/' + name[i] + '.pt', data)   
