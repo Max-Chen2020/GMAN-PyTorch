@@ -306,6 +306,13 @@ class transformAttention(nn.Module):
         del query, key, value, attention
         return X
 
+class phyAttention(nn.Module):
+    '''
+    merge branch with attention mechanism 
+    X:        [batch_size, num_pred, num_vertex, 2]
+    return:    [batch_size, num_pred, num_vertex, 2]
+    '''
+
 
 class GMAN(nn.Module):
     '''
