@@ -100,4 +100,4 @@ if __name__ == '__main__':
     lst = [testPred, testY]
     name = ['testPred', 'testY']
     for i, data in enumerate(lst):
-        torch.save('./figure/' + name[i] + '.pt', data)   
+        torch.save(data, './figure/' + name[i] + '.pt')   
