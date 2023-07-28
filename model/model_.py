@@ -34,19 +34,18 @@ class conv2d_(nn.Module):
         return x.permute(0, 3, 2, 1) # shape = (num_sample, num_his?, dim?, D)
 
 class conv3d_(nn.Module):
-    def __init__(self, input_dims, output_dims, kernel_size, stride=(1, 1),
+    def __init__(self, input_dims, output_dims, kernel_size, stride=(1, 1, 1),
                  padding='SAME', use_bias=True, activation=F.relu,
                  bn_decay=None):
-        super(conv2d_, self).__init__()
+        super().__init__()
         self.activation = activation
         if padding == 'SAME':
             self.padding_size = math.ceil(kernel_size)
         else:
-            self.padding_size = [0, 0]
-        # Conv2d requires shape = (num_sample, c_in, heigh, width) or (c_in, height, width)
-        self.conv = nn.Conv2d(input_dims, output_dims, kernel_size, stride=stride,
+            self.padding_size = [0, 0, 0]
+        self.conv = nn.Conv3d(input_dims, output_dims, kernel_size, stride=stride,
                               padding=0, bias=use_bias)
-        self.batch_norm = nn.BatchNorm2d(output_dims, momentum=bn_decay)
+        self.batch_norm = nn.BatchNorm3d(output_dims, momentum=bn_decay)
         torch.nn.init.xavier_uniform_(self.conv.weight)
 
         if use_bias:
@@ -54,13 +53,13 @@ class conv3d_(nn.Module):
 
 
     def forward(self, x):
-        x = x.permute(0, 3, 2, 1) # shape = (num_sample, var, dim, num_his)
-        x = F.pad(x, ([self.padding_size[1], self.padding_size[1], self.padding_size[0], self.padding_size[0]]))
+        x = x.permute(0, 4, 2, 3, 1) 
+        x = F.pad(x, ([self.padding_size[2], self.padding_size[2], self.padding_size[1], self.padding_size[0], self.padding_size[1]]))
         x = self.conv(x)
         x = self.batch_norm(x)
         if self.activation is not None:
             x = F.relu_(x)
-        return x.permute(0, 3, 2, 1) # shape = (num_sample, num_his?, dim?, D)
+        return x.permute(0, 4, 2, 3, 1) # shape = (num_sample, num_his?, dim?, D)
 
 
 class FC(nn.Module):
