@@ -334,16 +334,17 @@ class GMAN(nn.Module):
         self.STAttBlock_1 = nn.ModuleList([STAttBlock(K, d, bn_decay) for _ in range(L)])
         self.STAttBlock_2 = nn.ModuleList([STAttBlock(K, d, bn_decay) for _ in range(L)])
         self.transformAttention = transformAttention(K, d, bn_decay)
-        self.FC_1 = FC(input_dims=[2, D], units=[D, D], activations=[F.relu, None],
+        self.FC_1 = FC(input_dims=[1, D], units=[D, D], activations=[F.relu, None],
                        bn_decay=bn_decay)
-        self.FC_2 = FC(input_dims=[D, D], units=[D, 2], activations=[F.relu, None],
+        self.FC_2 = FC(input_dims=[D, D], units=[D, 1], activations=[F.relu, None],
                        bn_decay=bn_decay)
 
     def forward(self, X, TE):
 
         # input
-        # X = torch.unsqueeze(X, -1) # shape = (num_sample, num_his, dim, var, 1)
+        X, Y = X[:, :, :, 0], X[:, :, :, 1]
         X = self.FC_1(X)
+        Y = self.FC_1(Y)
         # STE
         STE = self.STEmbedding(self.SE, TE)
         STE_his = STE[:, :self.num_his]
@@ -351,12 +352,16 @@ class GMAN(nn.Module):
         # encoder
         for net in self.STAttBlock_1:
             X = net(X, STE_his)
+            Y = net(Y, STE_his)
         # transAtt
         X = self.transformAttention(X, STE_his, STE_pred)
+        Y = self.transformAttention(Y, STE_his, STE_pred)
         # decoder
         for net in self.STAttBlock_2:
             X = net(X, STE_pred)
+            Y = net(Y, STE_pred)
         # output
         X = self.FC_2(X)
+        Y = self.FC_2(Y)
         del STE, STE_his, STE_pred
-        return torch.squeeze(X, 3) # shape = (num_sample, num_his, dim, var)
+        return torch.cat((X, Y), dim = -1)
