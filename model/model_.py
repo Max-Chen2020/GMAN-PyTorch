@@ -54,7 +54,7 @@ class conv3d_(nn.Module):
 
     def forward(self, x):
         x = x.permute(0, 4, 2, 3, 1) 
-        x = F.pad(x, ([self.padding_size[2], self.padding_size[2], self.padding_size[1], self.padding_size[0], self.padding_size[1]]))
+        x = F.pad(x, ([self.padding_size[2], self.padding_size[2], self.padding_size[1], self.padding_size[1], self.padding_size[0], self.padding_size[0]]))
         x = self.conv(x)
         x = self.batch_norm(x)
         if self.activation is not None:
@@ -427,6 +427,7 @@ class GMAN(nn.Module):
         self.STAttBlock_1 = nn.ModuleList([STAttBlock(K, d, bn_decay) for _ in range(L)])
         self.STAttBlock_2 = nn.ModuleList([STAttBlock(K, d, bn_decay) for _ in range(L)])
         self.transformAttention = transformAttention(K, d, bn_decay)
+        self.phyAttention = phyAttention(K, d, bn_decay)
         self.FC_1 = FC(input_dims=[1, D], units=[D, D], activations=[F.relu, None],
                        bn_decay=bn_decay)
         self.FC_2 = FC(input_dims=[D, D], units=[D, 1], activations=[F.relu, None],
