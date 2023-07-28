@@ -313,11 +313,40 @@ class phyAttention(nn.Module):
     return:    [batch_size, num_pred, num_vertex, 2]
     '''
 
-    def __init__(self):
+    def __init__(self, K, d, bn_decay):
         super().__init__()
+        D = K * d
+        self.d = d
+        self.K = K
+        self.FC_q = FC(input_dims=2 * D, units=D, activations=F.relu,
+                       bn_decay=bn_decay)
+        self.FC_k = FC(input_dims=2 * D, units=D, activations=F.relu,
+                       bn_decay=bn_decay)
+        self.FC_v = FC(input_dims=2 * D, units=D, activations=F.relu,
+                       bn_decay=bn_decay)
+        self.FC = FC(input_dims=D, units=D, activations=F.relu,
+                     bn_decay=bn_decay)
 
-    def forward(self, X):
-        return 
+    def forward(self, X, STE):
+        batch_size = X.shape[0]
+        # [batch_size, num_step, num_vertex, K * d]
+        query = self.FC_q(X)
+        key = self.FC_k(X)
+        value = self.FC_v(X)
+        # [K * batch_size, num_step, num_vertex, d]
+        query = torch.cat(torch.split(query, self.K, dim=-1), dim=0)
+        key = torch.cat(torch.split(key, self.K, dim=-1), dim=0)
+        value = torch.cat(torch.split(value, self.K, dim=-1), dim=0)
+        # [K * batch_size, num_step, num_vertex, num_vertex]
+        attention = torch.matmul(query, key.transpose(2, 3))
+        attention /= (self.d ** 0.5)
+        attention = F.softmax(attention, dim=-1)
+        # [batch_size, num_step, num_vertex, D]
+        X = torch.matmul(attention, value)
+        X = torch.cat(torch.split(X, batch_size, dim=0), dim=-1)  # orginal K, change to batch_size
+        X = self.FC(X)
+        del query, key, value, attention
+        return X
 
 
 class GMAN(nn.Module):
