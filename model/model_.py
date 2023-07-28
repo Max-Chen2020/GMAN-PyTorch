@@ -460,8 +460,9 @@ class GMAN(nn.Module):
         Y = self.FC_2(Y)
         merged = torch.cat((X, Y), dim = -1) # shape = (num_sample, num_pred, num_vertex, num_var)
         # phyAtt
+        merged = merged.unsqueeze(-1)
         merged = self.phyAttention(merged)
         # final output
         merged = self.FC_3(merged)
         del STE, STE_his, STE_pred
-        return merged
+        return merged.squeeze(-1)
