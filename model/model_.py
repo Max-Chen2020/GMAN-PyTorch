@@ -384,7 +384,7 @@ class GMAN(nn.Module):
     def forward(self, X, TE):
 
         # input
-        X, Y = X[:, :, :, 0], X[:, :, :, 1]
+        X, Y = X[:, :, :, 0].unsqueeze(-1), X[:, :, :, 1].unsqueeze(-1)
         X = self.FC_1(X)
         Y = self.FC_1(Y)
         # STE
