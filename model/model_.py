@@ -369,16 +369,16 @@ class phyAttention(nn.Module):
         D = K * d
         self.d = d
         self.K = K
-        self.FC_q = FC(input_dims=D, units=D, activations=F.relu,
+        self.FC_q = FC_(input_dims=1, units=D, activations=F.relu,
                        bn_decay=bn_decay)
-        self.FC_k = FC(input_dims=D, units=D, activations=F.relu,
+        self.FC_k = FC_(input_dims=D, units=D, activations=F.relu,
                        bn_decay=bn_decay)
-        self.FC_v = FC(input_dims=D, units=D, activations=F.relu,
+        self.FC_v = FC_(input_dims=D, units=D, activations=F.relu,
                        bn_decay=bn_decay)
-        self.FC = FC(input_dims=D, units=D, activations=F.relu,
+        self.FC = FC_(input_dims=D, units=D, activations=F.relu,
                      bn_decay=bn_decay)
 
-    def forward(self, X, STE):
+    def forward(self, X):
         batch_size = X.shape[0]
         # [batch_size, num_step, num_vertex, K * d]
         query = self.FC_q(X)
