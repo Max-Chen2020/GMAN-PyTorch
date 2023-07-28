@@ -100,7 +100,7 @@ def test(device, args, log):
     log_string(log, 'performance in each prediction step')
     MAE, RMSE, MAPE = [], [], []
     for step in range(args.num_pred):
-        mae, rmse, mape = metric(testPred[:, step, :, 0], testY[:, step, :, 0])
+        mae, rmse, mape = metric(testPred[:, step, :, :], testY[:, step, :, :])
         MAE.append(mae)
         RMSE.append(rmse)
         MAPE.append(mape)
