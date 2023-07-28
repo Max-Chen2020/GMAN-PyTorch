@@ -318,11 +318,11 @@ class phyAttention(nn.Module):
         D = K * d
         self.d = d
         self.K = K
-        self.FC_q = FC(input_dims=2 * D, units=D, activations=F.relu,
+        self.FC_q = FC(input_dims=D, units=D, activations=F.relu,
                        bn_decay=bn_decay)
-        self.FC_k = FC(input_dims=2 * D, units=D, activations=F.relu,
+        self.FC_k = FC(input_dims=D, units=D, activations=F.relu,
                        bn_decay=bn_decay)
-        self.FC_v = FC(input_dims=2 * D, units=D, activations=F.relu,
+        self.FC_v = FC(input_dims=D, units=D, activations=F.relu,
                        bn_decay=bn_decay)
         self.FC = FC(input_dims=D, units=D, activations=F.relu,
                      bn_decay=bn_decay)
