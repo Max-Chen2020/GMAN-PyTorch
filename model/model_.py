@@ -431,9 +431,7 @@ class GMAN(nn.Module):
                        bn_decay=bn_decay)
         self.FC_2 = FC(input_dims=[D, D], units=[D, 1], activations=[F.relu, None],
                        bn_decay=bn_decay)
-        self.FC_3 = FC_(input_dims=[1, D], units=[D, D], activations=[F.relu, None],
-                       bn_decay=bn_decay)
-        self.FC_4 = FC_(input_dims=[D, D], units=[D, 1], activations=[F.relu, None],
+        self.FC_3 = FC_(input_dims=[D, D], units=[D, 1], activations=[F.relu, None],
                        bn_decay=bn_decay)
 
     def forward(self, X, TE):
@@ -460,5 +458,10 @@ class GMAN(nn.Module):
         # output
         X = self.FC_2(X)
         Y = self.FC_2(Y)
+        merged = torch.cat((X, Y), dim = -1) # shape = (num_sample, num_pred, num_vertex, num_var)
+        # phyAtt
+        merged = self.phyAttention(merged)
+        # final output
+        merged = self.FC_3(merged)
         del STE, STE_his, STE_pred
-        return torch.cat((X, Y), dim = -1)
+        return merged
