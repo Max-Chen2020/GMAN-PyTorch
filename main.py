@@ -85,44 +85,19 @@ parameters = count_parameters(model)
 log_string(log, 'trainable parameters: {:,}'.format(parameters))
 
 if __name__ == '__main__':
+    
     start = time.time()
 
-    # add device variable to train and test functions
     loss_train, loss_val = train(device, model, args, log, loss_criterion, optimizer, scheduler)
-    # plot_train_val_loss(loss_train, loss_val, 'figure/train_val_loss.png')
     trainPred, valPred, testPred = test(device, args, log)
   
     end = time.time()
+  
     log_string(log, 'total time: %.1fmin' % ((end - start) / 60))
     log.close()
-    # trainPred, valPred, testPred = trainPred.cpu(), valPred.cpu(), testPred.cpu()
-    # trainPred_ = trainPred.numpy().reshape(-1, trainY.shape[-1])
-    # trainY_ = trainY.numpy().reshape(-1, trainY.shape[-1])
-    # valPred_ = valPred.numpy().reshape(-1, valY.shape[-1])
-    # valY_ = valY.numpy().reshape(-1, valY.shape[-1])
-    # testPred_ = testPred.numpy().reshape(-1, testY.shape[-1])
-    # testY_ = testY.numpy().reshape(-1, testY.shape[-1])
-
-    # Save training, validation and testing datas to disk
-    # l = [trainPred_, trainY_, valPred_, valY_, testPred_, testY_]
-    # name = ['trainPred', 'trainY', 'valPred', 'valY', 'testPred', 'testY']
-    # l = [testPred_, testY_]
-    # name = ['testPred', 'testY']
-    # for i, data in enumerate(l):
-    #     np.savetxt('./figure/' + name[i] + '.txt', data, fmt='%s')
-        
-    # Plot the test prediction vs target（optional)
-    # num_nodes = args.num_nodes
-    # fig = plt.figure(figsize=(20, 280))
-    # for k in range(5):
-    #     plt.subplot(num_nodes, 1, k + 1)
-    #     for j in range(len(testPred)):
-    #         c, d = [], []
-    #         for i in range(12):
-    #             c.append(testPred[j, i, k, 0])
-    #             d.append(testY[j, i, k, 0])
-    #         plt.plot(range(1 + j, 12 + 1 + j), c, c='b')
-    #         plt.plot(range(1 + j, 12 + 1 + j), d, c='r')
-    # fig.suptitle('Test prediction vs Target', fontsize = 14)
-    # fig.tight_layout(rect=[0, 0.03, 1, 0.95])
-    # plt.savefig('./figure/test_results.png')
+    
+    testPred = testPred.cpu()
+    lst = [testPred, testY]
+    name = ['testPred', 'testY']
+    for i, data in enumerate(l):
+        np.save('./figure/' + name[i] + '.npy', data)   
