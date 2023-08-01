@@ -64,6 +64,12 @@ def train(device, model, args, log, loss_criterion, optimizer, scheduler):
             pred = model(X, TE)
             pred[:, :, :, 0] = pred[:, :, :, 0] * std[0] + mean[0]
             pred[:, :, :, 1] = pred[:, :, :, 1] * std[1] + mean[1]
+            v = pred[:, :, :, 0].clone()
+            q = pred[:, :, :, 1].clone()
+            k = torch.div(q, v)
+            dqdx = torch.autograd.grad(q, SE, grad_outputs=torch.ones_like(q)) 
+            dkdt = torch.autograd.grad(k, TE, grad_outputs=torch.ones_like(q)) 
+            print(f' using grad dqdx1: {dqdx.shape} \n using grad dkdt: {dkdt.shape}')
             loss_batch = loss_criterion(pred, label)
             # loss_batch = dl_loss + phy_loss
             train_loss += float(loss_batch) * (end_idx - start_idx)
