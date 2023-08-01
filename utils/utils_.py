@@ -143,6 +143,8 @@ def physical_loss(pred, label):
     # parameters: free flow speed, critical density and backward wave speed
     v_f = 70
     k_j = 18
+    x = torch.linspace(0, 199, 200)
+    t = torch.linspace(0, 11, 12)
 
     # merge and recover shape, apply mask
     loss = torch.stack((torch.square(v_f * (1 - k / k_j) - v), torch.square(v_f * k * (1 - k / k_j) - q)), axis = -1)
