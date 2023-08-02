@@ -130,6 +130,53 @@ class STEmbedding(nn.Module):
         del dayofweek, timeofday
         return SE + TE
 
+class physicalAttention(nn.Module):
+    '''
+    physical attention mechanism
+    X:      [batch_size, num_step, num_vertex, num_var, D]
+    STE:    [batch_size, num_step, num_vertex, num_var, D]
+    K:      number of attention heads
+    d:      dimension of each attention outputs
+    return: [batch_size, num_step, num_vertex, num_var, D]
+    '''
+
+    def __init__(self, K, d, bn_decay):
+        super().__init__()
+        D = K * d
+        self.d = d
+        self.K = K
+        self.FC_q = FC(input_dims=2 * D, units=D, activations=F.relu,
+                       bn_decay=bn_decay, expand=True)
+        self.FC_k = FC(input_dims=2 * D, units=D, activations=F.relu,
+                       bn_decay=bn_decay, expand=True)
+        self.FC_v = FC(input_dims=2 * D, units=D, activations=F.relu,
+                       bn_decay=bn_decay, expand=True)
+        self.FC = FC(input_dims=D, units=D, activations=F.relu,
+                     bn_decay=bn_decay, expand=True)
+
+    def forward(self, X, STE):
+        batch_size = X.shape[0]
+        X = torch.cat((X, STE), dim=-1)
+        # [batch_size, num_step, num_vertex, K * d]
+        query = self.FC_q(X)
+        key = self.FC_k(X)
+        value = self.FC_v(X)
+        # [K * batch_size, num_step, num_vertex, num_var, d]
+        query = torch.cat(torch.split(query, self.K, dim=-1), dim=0)
+        key = torch.cat(torch.split(key, self.K, dim=-1), dim=0)
+        value = torch.cat(torch.split(value, self.K, dim=-1), dim=0)
+        # [K * batch_size, num_step, num_vertex, num_var, num_var]
+        attention = torch.matmul(query, key.transpose(3, 4))
+        attention /= (self.d ** 0.5)
+        attention = F.softmax(attention, dim=-1)
+        # [batch_size, num_step, num_vertex, D]
+        X = torch.matmul(attention, value)
+        X = torch.cat(torch.split(X, batch_size, dim=0), dim=-1)  # orginal K, change to batch_size
+        X = self.FC(X)
+        del query, key, value, attention
+        return X
+
+
 
 class spatialAttention(nn.Module):
     '''
