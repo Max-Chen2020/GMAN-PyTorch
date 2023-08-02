@@ -426,7 +426,7 @@ class GMAN(nn.Module):
         D = K * d
         self.num_his = args.num_his
         self.SE = SE
-        self.STEmbedding = STEmbedding(D, T, bn_decay)
+        self.STPEmbedding = STPEmbedding(D, T, bn_decay)
         self.STAttBlock_1 = nn.ModuleList([STAttBlock(K, d, bn_decay) for _ in range(L)])
         self.STAttBlock_2 = nn.ModuleList([STAttBlock(K, d, bn_decay) for _ in range(L)])
         self.transformAttention = transformAttention(K, d, bn_decay)
@@ -441,7 +441,7 @@ class GMAN(nn.Module):
         X = torch.unsqueeze(X, -1) # shape = (num_sample, num_his, dim, var, 1)
         X = self.FC_1(X)
         # STE
-        STE = self.STEmbedding(self.SE, TE, self.T)
+        STE = self.STPEmbedding(self.SE, TE, self.T)
         STE_his = STE[:, :self.num_his]
         STE_pred = STE[:, self.num_his:]
         # encoder
