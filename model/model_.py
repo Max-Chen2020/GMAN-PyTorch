@@ -134,7 +134,7 @@ class STPEmbedding(nn.Module):
         TE = self.FC_te(TE)
         # physical embedding
         PE = F.one_hot(torch.arange(0, 2))
-        PE = PE.unsqueeze(0).unsqueeze(0).unsqueeze(0)
+        PE = PE.unsqueeze(0).unsqueeze(0).unsqueeze(0).to(TE.device, dtype = torch.float)
         PE = self.FC_pe(PE)
         del dayofweek, timeofday
         return SE + TE + PE
