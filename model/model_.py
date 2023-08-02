@@ -68,17 +68,17 @@ class STEmbedding(nn.Module):
     return: [batch_size, num_his + num_pred, num_vertex, D]
     '''
 
-    def __init__(self, D, bn_decay):
+    def __init__(self, D, T, bn_decay):
         super(STEmbedding, self).__init__()
         self.FC_se = FC(
             input_dims=[D, D], units=[D, D], activations=[F.relu, None],
             bn_decay=bn_decay)
 
         self.FC_te = FC(
-            input_dims=[295, D], units=[D, D], activations=[F.relu, None],
-            bn_decay=bn_decay)  # input_dims = time step per day + days per week=288+7=295
+            input_dims=[T+7, D], units=[D, D], activations=[F.relu, None],
+            bn_decay=bn_decay)  
 
-    def forward(self, SE, TE, T=288):
+    def forward(self, SE, TE, T):
         # spatial embedding
         SE = SE.unsqueeze(0).unsqueeze(0) # shape = (1, 1, num_vertex/dim, D) 
         SE = self.FC_se(SE)
@@ -88,7 +88,7 @@ class STEmbedding(nn.Module):
         for i in range(TE.shape[0]):
             dayofweek[i] = F.one_hot(TE[..., 0][i].to(torch.int64) % 7, 7)
         for j in range(TE.shape[0]):
-            timeofday[j] = F.one_hot(TE[..., 1][j].to(torch.int64) % 288, T)
+            timeofday[j] = F.one_hot(TE[..., 1][j].to(torch.int64) % T, T)
         TE = torch.cat((dayofweek, timeofday), dim=-1)
         TE = TE.unsqueeze(dim=2)
         TE = self.FC_te(TE)
@@ -324,13 +324,14 @@ class GMAN(nn.Module):
 
     def __init__(self, SE, args, bn_decay):
         super(GMAN, self).__init__()
+        T = 24 * 60 / args.time_slot
         L = args.L
         K = args.K
         d = args.d
         D = K * d
         self.num_his = args.num_his
         self.SE = SE
-        self.STEmbedding = STEmbedding(D, bn_decay)
+        self.STEmbedding = STEmbedding(D, T, bn_decay)
         self.STAttBlock_1 = nn.ModuleList([STAttBlock(K, d, bn_decay) for _ in range(L)])
         self.STAttBlock_2 = nn.ModuleList([STAttBlock(K, d, bn_decay) for _ in range(L)])
         self.transformAttention = transformAttention(K, d, bn_decay)
@@ -345,7 +346,7 @@ class GMAN(nn.Module):
         # X = torch.unsqueeze(X, -1) # shape = (num_sample, num_his, dim, var)
         X = self.FC_1(X)
         # STE
-        STE = self.STEmbedding(self.SE, TE)
+        STE = self.STEmbedding(self.SE, TE, self.T)
         STE_his = STE[:, :self.num_his]
         STE_pred = STE[:, self.num_his:]
         # encoder
