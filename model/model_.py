@@ -181,11 +181,11 @@ class physicalAttention(nn.Module):
 class spatialAttention(nn.Module):
     '''
     spatial attention mechanism
-    X:      [batch_size, num_step, num_vertex, D]
-    STE:    [batch_size, num_step, num_vertex, D]
+    X:      [batch_size, num_step, num_vertex, num_var, D]
+    STE:    [batch_size, num_step, num_vertex, num_var, D]
     K:      number of attention heads
     d:      dimension of each attention outputs
-    return: [batch_size, num_step, num_vertex, D]
+    return: [batch_size, num_step, num_vertex, num_var, D]
     '''
 
     def __init__(self, K, d, bn_decay):
@@ -194,13 +194,13 @@ class spatialAttention(nn.Module):
         self.d = d
         self.K = K
         self.FC_q = FC(input_dims=2 * D, units=D, activations=F.relu,
-                       bn_decay=bn_decay)
+                       bn_decay=bn_decay, expand=True)
         self.FC_k = FC(input_dims=2 * D, units=D, activations=F.relu,
-                       bn_decay=bn_decay)
+                       bn_decay=bn_decay, expand=True)
         self.FC_v = FC(input_dims=2 * D, units=D, activations=F.relu,
-                       bn_decay=bn_decay)
+                       bn_decay=bn_decay, expand=True)
         self.FC = FC(input_dims=D, units=D, activations=F.relu,
-                     bn_decay=bn_decay)
+                     bn_decay=bn_decay, expand=True)
 
     def forward(self, X, STE):
         batch_size = X.shape[0]
@@ -209,16 +209,20 @@ class spatialAttention(nn.Module):
         query = self.FC_q(X)
         key = self.FC_k(X)
         value = self.FC_v(X)
-        # [K * batch_size, num_step, num_vertex, d]
+        # [K * batch_size, num_step, num_vertex, num_var, d]
         query = torch.cat(torch.split(query, self.K, dim=-1), dim=0)
         key = torch.cat(torch.split(key, self.K, dim=-1), dim=0)
         value = torch.cat(torch.split(value, self.K, dim=-1), dim=0)
         # [K * batch_size, num_step, num_vertex, num_vertex]
-        attention = torch.matmul(query, key.transpose(2, 3))
+        query = query.permute(0, 1, 3, 2, 4)
+        key = key.permute(0, 1, 3, 4, 2)
+        value = value.permute(0, 1, 3, 2, 4)
+        attention = torch.matmul(query, key)
         attention /= (self.d ** 0.5)
         attention = F.softmax(attention, dim=-1)
         # [batch_size, num_step, num_vertex, D]
         X = torch.matmul(attention, value)
+        X = X.permute(0, 1, 3, 2, 4)
         X = torch.cat(torch.split(X, batch_size, dim=0), dim=-1)  # orginal K, change to batch_size
         X = self.FC(X)
         del query, key, value, attention
@@ -228,11 +232,11 @@ class spatialAttention(nn.Module):
 class temporalAttention(nn.Module):
     '''
     temporal attention mechanism
-    X:      [batch_size, num_step, num_vertex, D]
-    STE:    [batch_size, num_step, num_vertex, D]
+    X:      [batch_size, num_step, num_vertex, num_var, D]
+    STE:    [batch_size, num_step, num_vertex, num_var, D]
     K:      number of attention heads
     d:      dimension of each attention outputs
-    return: [batch_size, num_step, num_vertex, D]
+    return: [batch_size, num_step, num_vertex, num_var, D]
     '''
 
     def __init__(self, K, d, bn_decay, mask=True):
@@ -242,13 +246,13 @@ class temporalAttention(nn.Module):
         self.K = K
         self.mask = mask
         self.FC_q = FC(input_dims=2 * D, units=D, activations=F.relu,
-                       bn_decay=bn_decay)
+                       bn_decay=bn_decay, expand=True)
         self.FC_k = FC(input_dims=2 * D, units=D, activations=F.relu,
-                       bn_decay=bn_decay)
+                       bn_decay=bn_decay, expand=True)
         self.FC_v = FC(input_dims=2 * D, units=D, activations=F.relu,
-                       bn_decay=bn_decay)
+                       bn_decay=bn_decay, expand=True)
         self.FC = FC(input_dims=D, units=D, activations=F.relu,
-                     bn_decay=bn_decay)
+                     bn_decay=bn_decay, expand=True)
 
     def forward(self, X, STE):
         batch_size_ = X.shape[0]
@@ -261,12 +265,12 @@ class temporalAttention(nn.Module):
         query = torch.cat(torch.split(query, self.K, dim=-1), dim=0)
         key = torch.cat(torch.split(key, self.K, dim=-1), dim=0)
         value = torch.cat(torch.split(value, self.K, dim=-1), dim=0)
-        # query: [K * batch_size, num_vertex, num_step, d]
-        # key:   [K * batch_size, num_vertex, d, num_step]
-        # value: [K * batch_size, num_vertex, num_step, d]
-        query = query.permute(0, 2, 1, 3)
-        key = key.permute(0, 2, 3, 1)
-        value = value.permute(0, 2, 1, 3)
+        # query: [K * batch_size, num_var, num_vertex, num_step, d]
+        # key:   [K * batch_size, num_var, num_vertex, d, num_step]
+        # value: [K * batch_size, num_var, num_vertex, num_step, d]
+        query = query.permute(0, 3, 2, 1, 4)
+        key = key.permute(0, 3, 2, 4, 1)
+        value = value.permute(0, 3, 2, 1, 4)
         # [K * batch_size, num_vertex, num_step, num_step]
         attention = torch.matmul(query, key)
         attention /= (self.d ** 0.5)
@@ -285,7 +289,7 @@ class temporalAttention(nn.Module):
         attention = F.softmax(attention, dim=-1)
         # [batch_size, num_step, num_vertex, D]
         X = torch.matmul(attention, value)
-        X = X.permute(0, 2, 1, 3)
+        X = X.permute(0, 3, 2, 1, 4)
         X = torch.cat(torch.split(X, batch_size_, dim=0), dim=-1)  # orginal K, change to batch_size
         X = self.FC(X)
         del query, key, value, attention
