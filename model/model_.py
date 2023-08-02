@@ -135,7 +135,7 @@ class STPEmbedding(nn.Module):
         # physical embedding
         PE = F.one_hot(torch.arange(0, 2))
         PE = PE.unsqueeze(0).unsqueeze(0).unsqueeze(0)
-        PE = FC_pe(PE)
+        PE = self.FC_pe(PE)
         del dayofweek, timeofday
         return SE + TE + PE
 
