@@ -93,18 +93,23 @@ class FC(nn.Module):
         return x
 
 
-class STEmbedding(nn.Module):
+class STPEmbedding(nn.Module):
     '''
     spatio-temporal embedding
     SE:     [num_vertex, D]
     TE:     [batch_size, num_his + num_pred, 2] (dayofweek, timeofday)
+    PE:     [num_var, 2]
     T:      num of time steps in one day
     D:      output dims
-    return: [batch_size, num_his + num_pred, num_vertex, D]
+    return: [batch_size, num_his + num_pred, num_vertex, num_var, D]
     '''
 
     def __init__(self, D, T, bn_decay):
-        super(STEmbedding, self).__init__()
+        super().__init__()
+        self.FC_pe = FC(
+            input_dims=[2, D], units=[D, D], activations=[F.relu, None],
+            bn_decay=bn_decay)
+        
         self.FC_se = FC(
             input_dims=[D, D], units=[D, D], activations=[F.relu, None],
             bn_decay=bn_decay)
@@ -115,9 +120,9 @@ class STEmbedding(nn.Module):
 
     def forward(self, SE, TE, T):
         # spatial embedding
-        SE = SE.unsqueeze(0).unsqueeze(0) # shape = (1, 1, num_vertex/dim, D) 
+        SE = SE.unsqueeze(0).unsqueeze(0).unsqueeze(3) # shape = (1, 1, num_vertex/dim, 1, D) 
         SE = self.FC_se(SE)
-        # temporal embedding
+        # temporal embedding shape: (batch_size, num_step, 7) & (batch_size, num_step, T)
         dayofweek = torch.empty(TE.shape[0], TE.shape[1], 7).to(TE.device)
         timeofday = torch.empty(TE.shape[0], TE.shape[1], T).to(TE.device)
         for i in range(TE.shape[0]):
@@ -125,10 +130,14 @@ class STEmbedding(nn.Module):
         for j in range(TE.shape[0]):
             timeofday[j] = F.one_hot(TE[..., 1][j].to(torch.int64) % T, T)
         TE = torch.cat((dayofweek, timeofday), dim=-1)
-        TE = TE.unsqueeze(dim=2)
+        TE = TE.unsqueeze(dim=2).unsqueeze(3)
         TE = self.FC_te(TE)
+        # physical embedding
+        PE = F.one_hot(torch.arange(0, 2))
+        PE = PE.unsqueeze(0).unsqueeze(0).unsqueeze(0)
+        PE = Fc_pe(PE)
         del dayofweek, timeofday
-        return SE + TE
+        return SE + TE + PE
 
 class physicalAttention(nn.Module):
     '''
