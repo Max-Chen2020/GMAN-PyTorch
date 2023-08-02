@@ -108,15 +108,15 @@ class STPEmbedding(nn.Module):
         super().__init__()
         self.FC_pe = FC(
             input_dims=[2, D], units=[D, D], activations=[F.relu, None],
-            bn_decay=bn_decay)
+            bn_decay=bn_decay, expand=True)
         
         self.FC_se = FC(
             input_dims=[D, D], units=[D, D], activations=[F.relu, None],
-            bn_decay=bn_decay)
+            bn_decay=bn_decay, expand=True)
 
         self.FC_te = FC(
-            input_dims=[T+7, D], units=[D, D], activations=[F.relu, None],
-            bn_decay=bn_decay)  
+            input_dims=[295, D], units=[D, D], activations=[F.relu, None],
+            bn_decay=bn_decay, expand=True)  
 
     def forward(self, SE, TE, T):
         # spatial embedding
