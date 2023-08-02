@@ -86,9 +86,9 @@ def test(device, args, log):
         testPred[:, :, :, 1] = testPred[:, :, :, 1] * std[1] + mean[1]
         
     end_test = time.time()
-    train_mae, train_rmse, train_mape = metric(trainPred[:, :, :, 0], trainY[:, :, :, 0])
-    val_mae, val_rmse, val_mape = metric(valPred[:, :, :, 0], valY[:, :, :, 0])
-    test_mae, test_rmse, test_mape = metric(testPred[:, :, :, 0], testY[:, :, :, 0])
+    train_mae, train_rmse, train_mape = metric(trainPred, trainY)
+    val_mae, val_rmse, val_mape = metric(valPred, valY)
+    test_mae, test_rmse, test_mape = metric(testPred, testY)
     log_string(log, 'testing time: %.1fs' % (end_test - start_test))
     log_string(log, '                MAE\t\tRMSE\t\tMAPE')
     log_string(log, 'train            %.2f\t\t%.2f\t\t%.2f%%' %
@@ -100,7 +100,7 @@ def test(device, args, log):
     log_string(log, 'performance in each prediction step')
     MAE, RMSE, MAPE = [], [], []
     for step in range(args.num_pred):
-        mae, rmse, mape = metric(testPred[:, step, :, 0], testY[:, step, :, 0])
+        mae, rmse, mape = metric(testPred[:, step, :, :], testY[:, step, :, :])
         MAE.append(mae)
         RMSE.append(rmse)
         MAPE.append(mape)
