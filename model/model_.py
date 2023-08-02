@@ -33,9 +33,37 @@ class conv2d_(nn.Module):
             x = F.relu_(x)
         return x.permute(0, 3, 2, 1) # shape = (num_sample, num_his?, dim?, D)
 
+class conv3d_(nn.Module):
+    def __init__(self, input_dims, output_dims, kernel_size, stride=(1, 1, 1),
+                 padding='SAME', use_bias=True, activation=F.relu,
+                 bn_decay=None):
+        super().__init__()
+        self.activation = activation
+        if padding == 'SAME':
+            self.padding_size = math.ceil(kernel_size)
+        else:
+            self.padding_size = [0, 0, 0]
+        self.conv = nn.Conv3d(input_dims, output_dims, kernel_size, stride=stride,
+                              padding=0, bias=use_bias)
+        self.batch_norm = nn.BatchNorm3d(output_dims, momentum=bn_decay)
+        torch.nn.init.xavier_uniform_(self.conv.weight)
+
+        if use_bias:
+            torch.nn.init.zeros_(self.conv.bias)
+
+
+    def forward(self, x):
+        x = x.permute(0, 4, 2, 3, 1) 
+        x = F.pad(x, ([self.padding_size[2], self.padding_size[2], self.padding_size[1], self.padding_size[1], self.padding_size[0], self.padding_size[0]]))
+        x = self.conv(x)
+        x = self.batch_norm(x)
+        if self.activation is not None:
+            x = F.relu_(x)
+        return x.permute(0, 4, 2, 3, 1) # shape = (num_sample, num_his?, dim?, D)
+
 
 class FC(nn.Module):
-    def __init__(self, input_dims, units, activations, bn_decay, use_bias=True):
+    def __init__(self, input_dims, units, activations, bn_decay, expand=False, use_bias=True):
         super(FC, self).__init__()
         if isinstance(units, int):
             units = [units]
@@ -46,11 +74,18 @@ class FC(nn.Module):
             input_dims = list(input_dims)
             activations = list(activations)
         assert type(units) == list
-        self.convs = nn.ModuleList([conv2d_(
-            input_dims=input_dim, output_dims=num_unit, kernel_size=[1, 1], stride=[1, 1],
-            padding='VALID', use_bias=use_bias, activation=activation,
-            bn_decay=bn_decay) for input_dim, num_unit, activation in
-            zip(input_dims, units, activations)])
+        if not expand:
+            self.convs = nn.ModuleList([conv2d_(
+                input_dims=input_dim, output_dims=num_unit, kernel_size=[1, 1], stride=[1, 1],
+                padding='VALID', use_bias=use_bias, activation=activation,
+                bn_decay=bn_decay) for input_dim, num_unit, activation in
+                zip(input_dims, units, activations)])
+        else: 
+            self.convs = nn.ModuleList([conv3d_(
+                input_dims=input_dim, output_dims=num_unit, kernel_size=[1, 1, 1], stride=[1, 1, 1],
+                padding='VALID', use_bias=use_bias, activation=activation,
+                bn_decay=bn_decay) for input_dim, num_unit, activation in
+                zip(input_dims, units, activations)])
 
     def forward(self, x):
         for conv in self.convs:
