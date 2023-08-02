@@ -163,9 +163,9 @@ class physicalAttention(nn.Module):
         self.FC = FC(input_dims=D, units=D, activations=F.relu,
                      bn_decay=bn_decay, expand=True)
 
-    def forward(self, X, STE):
+    def forward(self, X, STPE):
         batch_size = X.shape[0]
-        X = torch.cat((X, STE), dim=-1)
+        X = torch.cat((X, STPE), dim=-1)
         # [batch_size, num_step, num_vertex, num_var, k * d]
         query = self.FC_q(X)
         key = self.FC_k(X)
@@ -263,9 +263,9 @@ class temporalAttention(nn.Module):
         self.FC = FC(input_dims=D, units=D, activations=F.relu,
                      bn_decay=bn_decay, expand=True)
 
-    def forward(self, X, STE):
+    def forward(self, X, STPE):
         batch_size_ = X.shape[0]
-        X = torch.cat((X, STE), dim=-1)
+        X = torch.cat((X, STPE), dim=-1)
         # [batch_size, num_step, num_vertex, num_var, K * d]
         query = self.FC_q(X)
         key = self.FC_k(X)
@@ -339,13 +339,13 @@ class gatedFusion(nn.Module):
 
 class STPAttBlock(nn.Module):
     def __init__(self, K, d, bn_decay, mask=False):
-        super(STAttBlock, self).__init__()
+        super().__init__()
         self.spatialAttention = spatialAttention(K, d, bn_decay)
         self.temporalAttention = temporalAttention(K, d, bn_decay, mask=mask)
         self.physicalAttention = physicalAttention(K, d, bn_decay)
         self.gatedFusion = gatedFusion(K * d, bn_decay)
 
-    def forward(self, X, STE):
+    def forward(self, X, STPE):
         HS = self.spatialAttention(X, STPE)
         HT = self.temporalAttention(X, STPE)
         HP = self.physicalAttention(X, STPE)
@@ -379,11 +379,11 @@ class transformAttention(nn.Module):
         self.FC = FC(input_dims=D, units=D, activations=F.relu,
                      bn_decay=bn_decay, expand=True)
 
-    def forward(self, X, STE_his, STE_pred):
+    def forward(self, X, STPE_his, STPE_pred):
         batch_size = X.shape[0]
         # [batch_size, num_step, num_vertex, K * d]
-        query = self.FC_q(STE_pred)
-        key = self.FC_k(STE_his)
+        query = self.FC_q(STPE_pred)
+        key = self.FC_k(STPE_his)
         value = self.FC_v(X)
         # [K * batch_size, num_step, num_vertex, d]
         query = torch.cat(torch.split(query, self.K, dim=-1), dim=0)
@@ -447,18 +447,18 @@ class GMAN(nn.Module):
         X = torch.unsqueeze(X, -1) # shape = (num_sample, num_his, dim, var, 1)
         X = self.FC_1(X)
         # STE
-        STE = self.STPEmbedding(self.SE, TE, self.T)
-        STE_his = STE[:, :self.num_his]
-        STE_pred = STE[:, self.num_his:]
+        STPE = self.STPEmbedding(self.SE, TE, self.T)
+        STPE_his = STPE[:, :self.num_his]
+        STPE_pred = STPE[:, self.num_his:]
         # encoder
         for net in self.STPAttBlock_1:
-            X = net(X, STE_his)
+            X = net(X, STPE_his)
         # transAtt
-        X = self.transformAttention(X, STE_his, STE_pred)
+        X = self.transformAttention(X, STPE_his, STPE_pred)
         # decoder
         for net in self.STPAttBlock_2:
-            X = net(X, STE_pred)
+            X = net(X, STPE_pred)
         # output
         X = self.FC_2(X)
-        del STE, STE_his, STE_pred
+        del STPE, STPE_his, STPE_pred
         return torch.squeeze(X, -1) # shape = (num_sample, num_his, dim, var)
