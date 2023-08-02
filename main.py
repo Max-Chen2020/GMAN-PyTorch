@@ -57,10 +57,10 @@ parser.add_argument('--model_file', default='./data/GMAN_pems.pkl',
 parser.add_argument('--log_file', default='./data/log',
                     help='log file')
 args = parser.parse_args()
+
+# load data and print shapes
 log = open(args.log_file, 'w')
 log_string(log, str(args)[10: -1])
-T = 24 * 60 // args.time_slot  # Number of time steps in one day
-# load data
 log_string(log, 'loading data...')
 (trainX, trainTE, trainY, valX, valTE, valY, testX, testTE,
  testY, SE, mean, std) = load_data(args)
@@ -71,12 +71,11 @@ log_string(log, f'speed mean:   {mean[0]:.4f}\t\tstd:   {std[0]:.4f}')
 log_string(log, f'flow mean:   {mean[1]:.4f}\t\tstd:   {std[1]:.4f}')
 log_string(log, 'data loaded!')
 del trainX, trainTE, valX, valTE, testX, testTE, mean, std
-# build model
 log_string(log, 'compiling model...')
 
+# build model
 model = GMAN(SE.to(device), args, bn_decay=0.1)
 loss_criterion = nn.MSELoss()
-
 optimizer = optim.Adam(model.parameters(), args.learning_rate)
 scheduler = optim.lr_scheduler.StepLR(optimizer,
                                       step_size=args.decay_epoch,
