@@ -370,15 +370,15 @@ class GMAN(nn.Module):
         self.STAttBlock_1 = nn.ModuleList([STAttBlock(K, d, bn_decay) for _ in range(L)])
         self.STAttBlock_2 = nn.ModuleList([STAttBlock(K, d, bn_decay) for _ in range(L)])
         self.transformAttention = transformAttention(K, d, bn_decay)
-        self.FC_1 = FC(input_dims=[2, D], units=[D, D], activations=[F.relu, None],
-                       bn_decay=bn_decay)
-        self.FC_2 = FC(input_dims=[D, D], units=[D, 2], activations=[F.relu, None],
-                       bn_decay=bn_decay)
+        self.FC_1 = FC(input_dims=[1, D], units=[D, D], activations=[F.relu, None],
+                       bn_decay=bn_decay, expand = True)
+        self.FC_2 = FC(input_dims=[D, D], units=[D, 1], activations=[F.relu, None],
+                       bn_decay=bn_decay, expand = True)
 
     def forward(self, X, TE):
 
         # input
-        # X = torch.unsqueeze(X, -1) # shape = (num_sample, num_his, dim, var)
+        X = torch.unsqueeze(X, -1) # shape = (num_sample, num_his, dim, var, 1)
         X = self.FC_1(X)
         # STE
         STE = self.STEmbedding(self.SE, TE, self.T)
@@ -395,4 +395,4 @@ class GMAN(nn.Module):
         # output
         X = self.FC_2(X)
         del STE, STE_his, STE_pred
-        return torch.squeeze(X, 3) # shape = (num_sample, num_his, dim, var)
+        return torch.squeeze(X, -1) # shape = (num_sample, num_his, dim, var)
