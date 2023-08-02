@@ -166,7 +166,7 @@ class physicalAttention(nn.Module):
     def forward(self, X, STE):
         batch_size = X.shape[0]
         X = torch.cat((X, STE), dim=-1)
-        # [batch_size, num_step, num_vertex, K * d]
+        # [batch_size, num_step, num_vertex, num_var, k * d]
         query = self.FC_q(X)
         key = self.FC_k(X)
         value = self.FC_v(X)
@@ -214,7 +214,7 @@ class spatialAttention(nn.Module):
     def forward(self, X, STE):
         batch_size = X.shape[0]
         X = torch.cat((X, STE), dim=-1)
-        # [batch_size, num_step, num_vertex, K * d]
+        # [batch_size, num_step, num_vertex, num_var, K * d]
         query = self.FC_q(X)
         key = self.FC_k(X)
         value = self.FC_v(X)
@@ -266,7 +266,7 @@ class temporalAttention(nn.Module):
     def forward(self, X, STE):
         batch_size_ = X.shape[0]
         X = torch.cat((X, STE), dim=-1)
-        # [batch_size, num_step, num_vertex, K * d]
+        # [batch_size, num_step, num_vertex, num_var, K * d]
         query = self.FC_q(X)
         key = self.FC_k(X)
         value = self.FC_v(X)
@@ -308,24 +308,28 @@ class temporalAttention(nn.Module):
 class gatedFusion(nn.Module):
     '''
     gated fusion
-    HS:     [batch_size, num_step, num_vertex, D]
-    HT:     [batch_size, num_step, num_vertex, D]
+    HS:     [batch_size, num_step, num_vertex, num_var, D]
+    HT:     [batch_size, num_step, num_vertex, num_var, D]
+    HP:     [batch_size, num_step, num_vertex, num_var, D]
     D:      output dims
-    return: [batch_size, num_step, num_vertex, D]
+    return: [batch_size, num_step, num_vertex, num_var, D]
     '''
 
     def __init__(self, D, bn_decay):
         super(gatedFusion, self).__init__()
         self.FC_xs = FC(input_dims=D, units=D, activations=None,
-                        bn_decay=bn_decay, use_bias=False)
+                        bn_decay=bn_decay, expand=True, use_bias=False)
         self.FC_xt = FC(input_dims=D, units=D, activations=None,
-                        bn_decay=bn_decay, use_bias=True)
+                        bn_decay=bn_decay, expand=True, use_bias=True)
+        self.FC_xp = FC(input_dims=D, units=D, activations=None,
+                        bn_decay=bn_decay, expand=True, use_bias=False)
         self.FC_h = FC(input_dims=[D, D], units=[D, D], activations=[F.relu, None],
                        bn_decay=bn_decay)
 
-    def forward(self, HS, HT):
+    def forward(self, HS, HT, HP):
         XS = self.FC_xs(HS)
         XT = self.FC_xt(HT)
+        XP = self.FC_xp(HP)
         z = torch.sigmoid(torch.add(XS, XT))
         H = torch.add(torch.mul(z, HS), torch.mul(1 - z, HT))
         H = self.FC_h(H)
@@ -333,30 +337,32 @@ class gatedFusion(nn.Module):
         return H
 
 
-class STAttBlock(nn.Module):
+class STPAttBlock(nn.Module):
     def __init__(self, K, d, bn_decay, mask=False):
         super(STAttBlock, self).__init__()
         self.spatialAttention = spatialAttention(K, d, bn_decay)
         self.temporalAttention = temporalAttention(K, d, bn_decay, mask=mask)
+        self.physicalAttention = physicalAttention(K, d, bn_decay)
         self.gatedFusion = gatedFusion(K * d, bn_decay)
 
     def forward(self, X, STE):
-        HS = self.spatialAttention(X, STE)
-        HT = self.temporalAttention(X, STE)
-        H = self.gatedFusion(HS, HT)
-        del HS, HT
+        HS = self.spatialAttention(X, STPE)
+        HT = self.temporalAttention(X, STPE)
+        HP = self.physicalAttention(X, STPE)
+        H = self.gatedFusion(HS, HT, HP)
+        del HS, HT, HP
         return torch.add(X, H)
 
 
 class transformAttention(nn.Module):
     '''
     transform attention mechanism
-    X:        [batch_size, num_his, num_vertex, D]
-    STE_his:  [batch_size, num_his, num_vertex, D]
-    STE_pred: [batch_size, num_pred, num_vertex, D]
+    X:        [batch_size, num_his, num_vertex, num_var, D]
+    STE_his:  [batch_size, num_his, num_vertex, num_var, D]
+    STE_pred: [batch_size, num_pred, num_vertex, num_var, D]
     K:        number of attention heads
     d:        dimension of each attention outputs
-    return:   [batch_size, num_pred, num_vertex, D]
+    return:   [batch_size, num_pred, num_vertex, num_var, D]
     '''
 
     def __init__(self, K, d, bn_decay):
@@ -365,13 +371,13 @@ class transformAttention(nn.Module):
         self.K = K
         self.d = d
         self.FC_q = FC(input_dims=D, units=D, activations=F.relu,
-                       bn_decay=bn_decay)
+                       bn_decay=bn_decay, expand=True)
         self.FC_k = FC(input_dims=D, units=D, activations=F.relu,
-                       bn_decay=bn_decay)
+                       bn_decay=bn_decay, expand=True)
         self.FC_v = FC(input_dims=D, units=D, activations=F.relu,
-                       bn_decay=bn_decay)
+                       bn_decay=bn_decay, expand=True)
         self.FC = FC(input_dims=D, units=D, activations=F.relu,
-                     bn_decay=bn_decay)
+                     bn_decay=bn_decay, expand=True)
 
     def forward(self, X, STE_his, STE_pred):
         batch_size = X.shape[0]
@@ -383,19 +389,19 @@ class transformAttention(nn.Module):
         query = torch.cat(torch.split(query, self.K, dim=-1), dim=0)
         key = torch.cat(torch.split(key, self.K, dim=-1), dim=0)
         value = torch.cat(torch.split(value, self.K, dim=-1), dim=0)
-        # query: [K * batch_size, num_vertex, num_pred, d]
-        # key:   [K * batch_size, num_vertex, d, num_his]
-        # value: [K * batch_size, num_vertex, num_his, d]
-        query = query.permute(0, 2, 1, 3)
-        key = key.permute(0, 2, 3, 1)
-        value = value.permute(0, 2, 1, 3)
+        # query: [K * batch_size, num_vertex, num_var, num_pred, d]
+        # key:   [K * batch_size, num_vertex, num_var, d, num_his]
+        # value: [K * batch_size, num_vertex, num_var, num_his, d]
+        query = query.permute(0, 3, 2, 1, 4)
+        key = key.permute(0, 3, 2, 4, 1)
+        value = value.permute(0, 3, 2, 1, 4)
         # [K * batch_size, num_vertex, num_pred, num_his]
         attention = torch.matmul(query, key)
         attention /= (self.d ** 0.5)
         attention = F.softmax(attention, dim=-1)
         # [batch_size, num_pred, num_vertex, D]
         X = torch.matmul(attention, value)
-        X = X.permute(0, 2, 1, 3)
+        X = X.permute(0, 3, 2, 1, 4)
         X = torch.cat(torch.split(X, batch_size, dim=0), dim=-1)
         X = self.FC(X)
         del query, key, value, attention
@@ -427,8 +433,8 @@ class GMAN(nn.Module):
         self.num_his = args.num_his
         self.SE = SE
         self.STPEmbedding = STPEmbedding(D, T, bn_decay)
-        self.STAttBlock_1 = nn.ModuleList([STAttBlock(K, d, bn_decay) for _ in range(L)])
-        self.STAttBlock_2 = nn.ModuleList([STAttBlock(K, d, bn_decay) for _ in range(L)])
+        self.STPAttBlock_1 = nn.ModuleList([STPAttBlock(K, d, bn_decay) for _ in range(L)])
+        self.STPAttBlock_2 = nn.ModuleList([STPAttBlock(K, d, bn_decay) for _ in range(L)])
         self.transformAttention = transformAttention(K, d, bn_decay)
         self.FC_1 = FC(input_dims=[1, D], units=[D, D], activations=[F.relu, None],
                        bn_decay=bn_decay, expand = True)
@@ -445,12 +451,12 @@ class GMAN(nn.Module):
         STE_his = STE[:, :self.num_his]
         STE_pred = STE[:, self.num_his:]
         # encoder
-        for net in self.STAttBlock_1:
+        for net in self.STPAttBlock_1:
             X = net(X, STE_his)
         # transAtt
         X = self.transformAttention(X, STE_his, STE_pred)
         # decoder
-        for net in self.STAttBlock_2:
+        for net in self.STPAttBlock_2:
             X = net(X, STE_pred)
         # output
         X = self.FC_2(X)
