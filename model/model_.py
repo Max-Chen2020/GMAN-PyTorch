@@ -115,7 +115,7 @@ class STPEmbedding(nn.Module):
             bn_decay=bn_decay, expand=True)
 
         self.FC_te = FC(
-            input_dims=[295, D], units=[D, D], activations=[F.relu, None],
+            input_dims=[T+7, D], units=[D, D], activations=[F.relu, None],
             bn_decay=bn_decay, expand=True)  
 
     def forward(self, SE, TE, T):
@@ -135,7 +135,7 @@ class STPEmbedding(nn.Module):
         # physical embedding
         PE = F.one_hot(torch.arange(0, 2))
         PE = PE.unsqueeze(0).unsqueeze(0).unsqueeze(0)
-        PE = Fc_pe(PE)
+        PE = FC_pe(PE)
         del dayofweek, timeofday
         return SE + TE + PE
 
@@ -427,7 +427,7 @@ class GMAN(nn.Module):
 
     def __init__(self, SE, args, bn_decay):
         super(GMAN, self).__init__()
-        T = 24 * 60 / args.time_slot
+        T = 24 * 60 // args.time_slot
         L = args.L
         K = args.K
         d = args.d
