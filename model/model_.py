@@ -324,7 +324,7 @@ class gatedFusion(nn.Module):
         self.FC_xp = FC(input_dims=D, units=D, activations=None,
                         bn_decay=bn_decay, expand=True, use_bias=False)
         self.FC_h = FC(input_dims=[D, D], units=[D, D], activations=[F.relu, None],
-                       bn_decay=bn_decay)
+                       bn_decay=bn_decay, expand=True)
 
     def forward(self, HS, HT, HP):
         XS = self.FC_xs(HS)
