@@ -100,7 +100,7 @@ if __name__ == '__main__':
     log.close()
   
     testPred = testPred.cpu()
-    l = [testPred_, testY_]
+    l = [testPred, testY]
     name = ['testPred', 'testY']
     for i, data in enumerate(l):
         torch.save(data, './figure/' + name[i] + '.pt')
