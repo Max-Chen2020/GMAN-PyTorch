@@ -322,13 +322,15 @@ class GMAN(nn.Module):
         return：  [batch_size, num_pred, num_vertex]
     '''
 
-    def __init__(self, SE, args, bn_decay):
+    def __init__(self, SE, args, ids, merged, bn_decay):
         super(GMAN, self).__init__()
         L = args.L
         K = args.K
         d = args.d
         D = K * d
         self.num_his = args.num_his
+        self.ids = ids
+        self.merged = merged
         self.SE = SE
         self.STEmbedding = STEmbedding(D, bn_decay)
         self.STAttBlock_1 = nn.ModuleList([STAttBlock(K, d, bn_decay) for _ in range(L)])
