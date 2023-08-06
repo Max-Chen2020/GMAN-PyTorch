@@ -27,20 +27,28 @@ def metric(pred, label, ids, merged):
     mape = mape * mask
     mape = torch.nanmean(mape)
 
-    v = pred[:, :, 0]
-    q = pred[:, :, 1]
-    k = torch.div(q, v)
-
-    # calculate loss
     total_loss = 0
+    if (len(pred.shape) == 4):
+      v = pred[:, :, :, 0]
+      q = pred[:, :, :, 1]
+    else:
+      v = pred[:, :, 0]
+      q = pred[:, :, 1]
+    k = torch.div(q, v)
+    
     for _, value in merged.items():
-        curv = v[:, np.isin(ids, value['id'])]
-        curk = k[:, np.isin(ids, value['id'])]
-        curq = q[:, np.isin(ids, value['id'])]
+        if (len(pred.shape) == 4):
+          curv = v[:, :, np.isin(ids, value['id'])]
+          curk = k[:, :, np.isin(ids, value['id'])]
+          curq = q[:, :, np.isin(ids, value['id'])]
+        else: 
+          curv = v[:, np.isin(ids, value['id'])]
+          curk = k[:, np.isin(ids, value['id'])]
+          curq = q[:, np.isin(ids, value['id'])]
         k_j = value['param'][0]
         v_f = value['param'][1]
-        total_loss += torch.mean(torch.square(v_f * (1 - curk / k_j) - curv))
-        total_loss += torch.mean(torch.square(v_f * curk * (1 - curk / k_j) - curq))
+        total_loss += torch.mean(torch.abs(v_f * (1 - curk / k_j) - curv))
+        total_loss += torch.mean(torch.abs(v_f * curk * (1 - curk / k_j) - curq))
     return mae, rmse, mape, total_loss
 
 
