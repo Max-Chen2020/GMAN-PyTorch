@@ -34,9 +34,9 @@ def metric(pred, label, ids, merged):
     # calculate loss
     total_loss = 0
     for _, value in merged.items():
-        curv = v[:, np.isin(ids, value['id'])]
-        curk = k[:, np.isin(ids, value['id'])]
-        curq = q[:, np.isin(ids, value['id'])]
+        curv = v[:, :, np.isin(ids, value['id'])]
+        curk = k[:, :, np.isin(ids, value['id'])]
+        curq = q[:, :, np.isin(ids, value['id'])]
         k_j = value['param'][0]
         v_f = value['param'][1]
         total_loss += torch.mean(torch.square(v_f * (1 - curk / k_j) - curv))
@@ -164,9 +164,9 @@ def physical_loss(pred, ids, merged):
     # calculate loss
     total_loss = 0
     for _, value in merged.items():
-        curv = v[:, np.isin(ids, value['id'])]
-        curk = k[:, np.isin(ids, value['id'])]
-        curq = q[:, np.isin(ids, value['id'])]
+        curv = v[:, :, np.isin(ids, value['id'])]
+        curk = k[:, :, np.isin(ids, value['id'])]
+        curq = q[:, :, np.isin(ids, value['id'])]
         k_j = value['param'][0]
         v_f = value['param'][1]
         total_loss += torch.mean(torch.square(v_f * (1 - curk / k_j) - curv))
