@@ -133,32 +133,39 @@ def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 # Physics-informed loss
-def physical_loss(pred, label):
+def physical_loss(pred, ids, merged):
 
     # filtering 0s and nans, recalculate weights 
-    mask = torch.ne(label, 0).type(torch.float32)
-    mask /= torch.mean(mask)
-    mask = torch.where(torch.isnan(mask), torch.tensor(0.0), mask)
+    # mask = torch.ne(label, 0).type(torch.float32)
+    # mask /= torch.mean(mask)
+    # mask = torch.where(torch.isnan(mask), torch.tensor(0.0), mask)
 
     # extract traffic varialbes: v for speed, q for flow and k for density 
     v = pred[:, :, :, 0]
     q = pred[:, :, :, 1]
     k = torch.div(q, v)
 
-    # parameters: free flow speed, critical density and backward wave speed
-    v_f = 70
-    k_j = 18
+    # calculate loss
+    total_loss = 0
+    for _, value in merged.items():
+        curv = v[:, np.isin(ids, value['id'])]
+        curk = k[:, np.isin(ids, value['id'])]
+        curq = q[:, np.isin(ids, value['id'])]
+        k_j = value['param'][0]
+        v_f = value['param'][1]
+        total_loss += torch.mean(torch.square(v_f * (1 - curk / k_j) - curv))
+        total_loss += torch.mean(torch.square(v_f * curk * (1 - curk / k_j) - curq))
 
     # merge and recover shape, apply mask
-    loss = torch.stack((torch.square(v_f * (1 - k / k_j) - v), torch.square(v_f * k * (1 - k / k_j) - q)), axis = -1)
-    loss = torch.mul(loss, mask)
-    loss = torch.nanmean(loss)
-    return loss 
+    # loss = torch.stack((torch.square(v_f * (1 - k / k_j) - v), torch.square(v_f * k * (1 - k / k_j) - q)), axis = -1)
+    # loss = torch.mul(loss, mask)
+    # loss = torch.nanmean(loss)
+    return total_loss 
 
 # Weighted total loss
-def wt_loss(pred, label, alpha = 0.5):
+def wt_loss(pred, label, ids, merged, alpha = 0.5):
     dl_loss = torch.nn.MSELoss()
-    return (1 - alpha) * dl_loss(pred, label), alpha * physical_loss(pred, label)
+    return (1 - alpha) * dl_loss(pred, label), alpha * physical_loss(pred, ids, merged)
     
 
 
