@@ -52,6 +52,8 @@ parser.add_argument('--traffic_file', default='./data/pems.h5',
                     help='traffic file')
 parser.add_argument('--SE_file', default='./data/SE(PeMS).txt',
                     help='spatial embedding file')
+parser.add_argument('--cluster_file', default='./data/cluster_param.json',
+                    help='estimated parameters for each cluster')
 parser.add_argument('--model_file', default='./data/GMAN_pems.pkl',
                     help='save the model to disk')
 parser.add_argument('--log_file', default='./data/log',
@@ -75,8 +77,8 @@ del trainX, trainTE, valX, valTE, testX, testTE, mean, std
 log_string(log, 'compiling model...')
 
 model = GMAN(SE.to(device), args, bn_decay=0.1)
-# loss_criterion = wt_loss
-loss_criterion = nn.MSELoss()
+loss_criterion = wt_loss
+# loss_criterion = nn.MSELoss()
 
 optimizer = optim.Adam(model.parameters(), args.learning_rate)
 scheduler = optim.lr_scheduler.StepLR(optimizer,
