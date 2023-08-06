@@ -27,16 +27,16 @@ def metric(pred, label, ids, merged):
     mape = mape * mask
     mape = torch.nanmean(mape)
 
-    v = pred[:, :, :, 0]
-    q = pred[:, :, :, 1]
+    v = pred[:, :, 0]
+    q = pred[:, :, 1]
     k = torch.div(q, v)
 
     # calculate loss
     total_loss = 0
     for _, value in merged.items():
-        curv = v[:, :, np.isin(ids, value['id'])]
-        curk = k[:, :, np.isin(ids, value['id'])]
-        curq = q[:, :, np.isin(ids, value['id'])]
+        curv = v[:, np.isin(ids, value['id'])]
+        curk = k[:, np.isin(ids, value['id'])]
+        curq = q[:, np.isin(ids, value['id'])]
         k_j = value['param'][0]
         v_f = value['param'][1]
         total_loss += torch.mean(torch.square(v_f * (1 - curk / k_j) - curv))
