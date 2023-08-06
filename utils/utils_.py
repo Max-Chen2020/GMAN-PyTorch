@@ -13,7 +13,7 @@ def log_string(log, string):
 
 
 # metric
-def metric(pred, label):
+def metric(pred, label, ids, merged):
     mask = torch.ne(label, 0)
     mask = mask.type(torch.float32)
     mask /= torch.mean(mask)
@@ -25,7 +25,22 @@ def metric(pred, label):
     rmse = torch.sqrt(torch.nanmean(rmse))
     mape = mape * mask
     mape = torch.nanmean(mape)
-    return mae, rmse, mape
+
+    v = pred[:, :, :, 0]
+    q = pred[:, :, :, 1]
+    k = torch.div(q, v)
+
+    # calculate loss
+    total_loss = 0
+    for _, value in merged.items():
+        curv = v[:, np.isin(ids, value['id'])]
+        curk = k[:, np.isin(ids, value['id'])]
+        curq = q[:, np.isin(ids, value['id'])]
+        k_j = value['param'][0]
+        v_f = value['param'][1]
+        total_loss += torch.mean(torch.square(v_f * (1 - curk / k_j) - curv))
+        total_loss += torch.mean(torch.square(v_f * curk * (1 - curk / k_j) - curq))
+    return mae, rmse, mape, total_loss
 
 
 def seq2instance(data, num_his, num_pred):
