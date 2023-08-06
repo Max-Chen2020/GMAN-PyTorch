@@ -91,11 +91,11 @@ def test(device, args, log):
     test_mae, test_rmse, test_mape, test_phy= metric(testPred, testY, model.ids, model.merged)
     log_string(log, 'testing time: %.1fs' % (end_test - start_test))
     log_string(log, '                MAE\t\tRMSE\t\tMAPE\t\tPHY')
-    log_string(log, 'train            %.2f\t\t%.2f\t\t%.2f\t\t%.2f%%' %
+    log_string(log, 'train            %.2f\t\t%.2f\t\t%.2f%%\t\t%.2f' %
                (train_mae, train_rmse, train_mape * 100, train_phy))
-    log_string(log, 'val              %.2f\t\t%.2f\t\t%.2f\t\t%.2f%%' %
+    log_string(log, 'val              %.2f\t\t%.2f\t\t%.2f%%\t\t%.2f' %
                (val_mae, val_rmse, val_mape * 100, val_phy))
-    log_string(log, 'test             %.2f\t\t%.2f\t\t%.2f\t\t%.2f%%' %
+    log_string(log, 'test             %.2f\t\t%.2f\t\t%.2f%%\t\t%.2f' %
                (test_mae, test_rmse, test_mape * 100, test_phy))
     log_string(log, 'performance in each prediction step')
     MAE, RMSE, MAPE, PHY = [], [], [], []
@@ -105,7 +105,7 @@ def test(device, args, log):
         RMSE.append(rmse)
         MAPE.append(mape)
         PHY.append(phy)
-        log_string(log, 'step: %02d         %.2f\t\t%.2f\t\t%.2f\t\t%.2f%%' %
+        log_string(log, 'step: %02d         %.2f\t\t%.2f\t\t%.2f%%\t\t%.2f' %
                    (step + 1, mae, rmse, mape * 100, phy))
 
     average_mae = torch.stack(MAE).mean()
@@ -113,6 +113,6 @@ def test(device, args, log):
     average_mape = torch.stack(MAPE).mean()
     average_phy = torch.stack(PHY).mean()
     log_string(
-        log, 'average:         %.2f\t\t%.2f\t\t%.2f\t\t%.2f%%' %
+        log, 'average:         %.2f\t\t%.2f\t\t%.2f%%\t\t%.2f' %
              (average_mae, average_rmse, average_mape * 100, average_phy))
     return trainPred, valPred, testPred
