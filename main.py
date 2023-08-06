@@ -73,11 +73,11 @@ log_string(log, f'speed mean:   {mean[0]:.4f}\t\tstd:   {std[0]:.4f}')
 log_string(log, f'flow mean:   {mean[1]:.4f}\t\tstd:   {std[1]:.4f}')
 log_string(log, f'number of nodes:   {ids.shape}\t\tclusters:   {len(clusters}')
 log_string(log, 'data loaded!')
-del trainX, trainTE, valX, valTE, testX, testTE, mean, std, ids, merged
+del trainX, trainTE, valX, valTE, testX, testTE, mean, std
 # build model
 log_string(log, 'compiling model...')
 
-model = GMAN(SE.to(device), args, bn_decay=0.1)
+model = GMAN(SE.to(device), args, ids, merged, bn_decay=0.1)
 loss_criterion = wt_loss
 # loss_criterion = nn.MSELoss()
 
