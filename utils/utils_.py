@@ -50,6 +50,7 @@ def load_data(args):
     # Traffic
     speed = pd.read_hdf(args.traffic_file, key = 'speed', mode = 'r')
     flow = pd.read_hdf(args.traffic_file, key = 'flow', mode = 'r')
+    ids = speed.columns.values
     traffic = np.stack((speed.values, flow.values), axis = -1)
     traffic = torch.from_numpy(traffic)
     # train/val/test
@@ -105,8 +106,12 @@ def load_data(args):
     testTE = seq2instance(test, args.num_his, args.num_pred)
     testTE = torch.cat(testTE, 1).type(torch.int32)
 
+    # clustering parameters
+    with open(args.cluster_file, 'r') as f:
+        merged = json.load(f)
+
     return (trainX, trainTE, trainY, valX, valTE, valY, testX, testTE, testY,
-            SE, mean, std)
+            SE, mean, std, ids, merged)
 
 
 # dataset creation
