@@ -98,7 +98,7 @@ def test(device, args, log):
     log_string(log, 'test             %.2f\t\t%.2f\t\t%.2f\t\t%.2f%%' %
                (test_mae, test_rmse, test_mape * 100, test_phy))
     log_string(log, 'performance in each prediction step')
-    MAE, RMSE, MAPE, PHY = [], [], []
+    MAE, RMSE, MAPE, PHY = [], [], [], []
     for step in range(args.num_pred):
         mae, rmse, mape, phy = metric(testPred[:, step, :, :], testY[:, step, :, :], model.ids, model.merged)
         MAE.append(mae)
