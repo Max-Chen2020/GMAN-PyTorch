@@ -67,14 +67,11 @@ def train(device, model, args, log, loss_criterion, optimizer, scheduler):
             v = pred[:, :, :, 0].clone()
             q = pred[:, :, :, 1].clone()
             k = torch.div(q, v)
-            dqdx = torch.autograd.grad(q, SE, grad_outputs=torch.ones_like(q), is_grads_batched=True) 
-            dkdt = torch.autograd.grad(k, TE, grad_outputs=torch.ones_like(q), is_grads_batched=True) 
-            print(f' using grad dqdx1: {dqdx.shape} \n using grad dkdt: {dkdt.shape}')
-            loss_batch = loss_criterion(pred, label)
-            # loss_batch = dl_loss + phy_loss
+            dl_loss, phy_loss = loss_criterion(pred, label, model.ids, model.merged)
+            loss_batch = dl_loss + phy_loss
             train_loss += float(loss_batch) * (end_idx - start_idx)
-            # dl += float(dl_loss) * (end_idx - start_idx)
-            # phy += float(phy_loss) * (end_idx - start_idx)
+            dl += float(dl_loss) * (end_idx - start_idx)
+            phy += float(phy_loss) * (end_idx - start_idx)
             loss_batch.backward()
             optimizer.step()
             if torch.cuda.is_available():
@@ -83,10 +80,10 @@ def train(device, model, args, log, loss_criterion, optimizer, scheduler):
                 print(f'Training batch: {batch_idx+1} in epoch:{epoch}, training batch loss:{loss_batch:.4f}')
             del X, TE, label, pred, loss_batch
         train_loss /= num_train
-        # dl /= num_train
-        # phy /= num_train
-        # train_dl_loss.append(dl)
-        # train_phy_loss.append(phy)
+        dl /= num_train
+        phy /= num_train
+        train_dl_loss.append(dl)
+        train_phy_loss.append(phy)
         end_train = time.time()
 
         # val loss
@@ -105,17 +102,17 @@ def train(device, model, args, log, loss_criterion, optimizer, scheduler):
                 pred = model(X, TE)
                 pred[:, :, :, 0] = pred[:, :, :, 0] * std[0] + mean[0]
                 pred[:, :, :, 1] = pred[:, :, :, 1] * std[1] + mean[1]
-                loss_batch = loss_criterion(pred, label)
-                # loss_batch = dl_loss + phy_loss
+                dl_loss, phy_loss = loss_criterion(pred, label, model.ids, model.merged)
+                loss_batch = dl_loss + phy_loss
                 val_loss += float(loss_batch) * (end_idx - start_idx)
-                # dl_ += float(dl_loss) * (end_idx - start_idx)
-                # phy_ += float(phy_loss) * (end_idx - start_idx)
+                dl_ += float(dl_loss) * (end_idx - start_idx)
+                phy_ += float(phy_loss) * (end_idx - start_idx)
                 del X, TE, label, pred, loss_batch
         val_loss /= num_val
-        # dl_ /= num_val
-        # phy_ /= num_val
-        # val_dl_loss.append(dl_)
-        # val_phy_loss.append(phy_)
+        dl_ /= num_val
+        phy_ /= num_val
+        val_dl_loss.append(dl_)
+        val_phy_loss.append(phy_)
         end_val = time.time()
         log_string(
             log,
