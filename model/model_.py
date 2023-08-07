@@ -330,12 +330,11 @@ class gatedFusion(nn.Module):
         XS = self.FC_xs(HS)
         XT = self.FC_xt(HT)
         XP = self.FC_xp(HP)
-        x = torch.sigmoid(torch.add(XS, XT))
-        y = torch.sigmoid(torch.add(XS, XP))
-        z = torch.sigmoid(torch.add(XT, XP))
-        H = torch.add(torch.add(torch.mul(x+y, HS), torch.mul(x+z, HT)), torch.mul(y+z, HT))
+        H = torch.add(torch.add(XS, XT), XP)
+        w = torch.softmax(H)
+        H = torch.mul(w, H)
         H = self.FC_h(H)
-        del XS, XT, XP, x, y, z
+        del XS, XT, XP, w
         return H
 
 
