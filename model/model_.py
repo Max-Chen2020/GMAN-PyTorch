@@ -426,14 +426,14 @@ class GMAN(nn.Module):
 
     def __init__(self, SE, args, bn_decay):
         super(GMAN, self).__init__()
-        T = 24 * 60 // args.time_slot
+        self.T = 24 * 60 // args.time_slot
         L = args.L
         K = args.K
         d = args.d
         D = K * d
         self.num_his = args.num_his
         self.SE = SE
-        self.STPEmbedding = STPEmbedding(D, T, bn_decay)
+        self.STPEmbedding = STPEmbedding(D, self.T, bn_decay)
         self.STPAttBlock_1 = nn.ModuleList([STPAttBlock(K, d, bn_decay) for _ in range(L)])
         self.STPAttBlock_2 = nn.ModuleList([STPAttBlock(K, d, bn_decay) for _ in range(L)])
         self.transformAttention = transformAttention(K, d, bn_decay)
