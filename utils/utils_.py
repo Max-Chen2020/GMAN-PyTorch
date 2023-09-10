@@ -50,7 +50,7 @@ def load_data(args):
     # Traffic
     speed = pd.read_hdf(args.traffic_file, key = 'speed', mode = 'r')
     flow = pd.read_hdf(args.traffic_file, key = 'flow', mode = 'r')
-    traffic = np.stack((speed.values, flow.values), axis = -1)
+    traffic = np.stack((flow.values, speed.values), axis = -1)
     traffic = torch.from_numpy(traffic)
     # train/val/test
     num_step = speed.shape[0]
