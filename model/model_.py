@@ -75,10 +75,10 @@ class STEmbedding(nn.Module):
             bn_decay=bn_decay)
 
         self.FC_te = FC(
-            input_dims=[295, D], units=[D, D], activations=[F.relu, None],
+            input_dims=[103, D], units=[D, D], activations=[F.relu, None],
             bn_decay=bn_decay)  # input_dims = time step per day + days per week=288+7=295
 
-    def forward(self, SE, TE, T=288):
+    def forward(self, SE, TE, T=96):
         # spatial embedding
         SE = SE.unsqueeze(0).unsqueeze(0) # shape = (1, 1, num_vertex/dim, D) 
         SE = self.FC_se(SE)
@@ -88,7 +88,7 @@ class STEmbedding(nn.Module):
         for i in range(TE.shape[0]):
             dayofweek[i] = F.one_hot(TE[..., 0][i].to(torch.int64) % 7, 7)
         for j in range(TE.shape[0]):
-            timeofday[j] = F.one_hot(TE[..., 1][j].to(torch.int64) % 288, T)
+            timeofday[j] = F.one_hot(TE[..., 1][j].to(torch.int64) % T, T)
         TE = torch.cat((dayofweek, timeofday), dim=-1)
         TE = TE.unsqueeze(dim=2)
         TE = self.FC_te(TE)
@@ -336,13 +336,12 @@ class GMAN(nn.Module):
         self.transformAttention = transformAttention(K, d, bn_decay)
         self.FC_1 = FC(input_dims=[2, D], units=[D, D], activations=[F.relu, None],
                        bn_decay=bn_decay)
-        self.FC_2 = FC(input_dims=[D, D], units=[D, 2], activations=[F.relu, None],
+        self.FC_2 = FC(input_dims=[D, D], units=[D, 1], activations=[F.relu, None],
                        bn_decay=bn_decay)
 
     def forward(self, X, TE):
 
         # input
-        # X = torch.unsqueeze(X, -1) # shape = (num_sample, num_his, dim, var, 1)
         X = self.FC_1(X)
         # STE
         STE = self.STEmbedding(self.SE, TE)
