@@ -40,7 +40,7 @@ def seq2instance(data, num_his, num_pred):
 
 def load_data(args):
     # Traffic
-    df = pd.read_hdf(args.traffic_file)
+    df = pd.read_hdf(args.traffic_file, key = 'flow', mode = 'r')
     traffic = torch.from_numpy(df.values)
     # train/val/test
     num_step = df.shape[0]
