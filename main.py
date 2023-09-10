@@ -88,16 +88,15 @@ if __name__ == '__main__':
 
     # add device variable to train and test functions
     loss_train, loss_val = train(device, model, args, log, loss_criterion, optimizer, scheduler)
-    plot_train_val_loss(loss_train, loss_val, 'figure/train_val_loss.png')
     trainPred, valPred, testPred = test(device, args, log)
   
     end = time.time()
     log_string(log, 'total time: %.1fmin' % ((end - start) / 60))
     log.close()
     
-    testPred = testPred.cpu()
+    # testPred = testPred.cpu()
 
-    l = [testPred, testY]
-    name = ['testPred', 'testY']
-    for i, data in enumerate(l):
-        torch.save(data, './figure/' + name[i] + '.pt')
+    # l = [testPred, testY]
+    # name = ['testPred', 'testY']
+    # for i, data in enumerate(l):
+    #     torch.save(data, './figure/' + name[i] + '.pt')
