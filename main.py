@@ -18,9 +18,9 @@ from model.test import test
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--time_slot', type=int, default=5,
+parser.add_argument('--time_slot', type=int, default=15,
                     help='a time step is 5 mins')
-parser.add_argument('--num_nodes', default=200,
+parser.add_argument('--num_nodes', default=193,
                     help='number of nodes')
 parser.add_argument('--num_his', type=int, default=12,
                     help='history steps')
@@ -48,11 +48,11 @@ parser.add_argument('--learning_rate', type=float, default=0.001,
                     help='initial learning rate')
 parser.add_argument('--decay_epoch', type=int, default=10,
                     help='decay epoch')
-parser.add_argument('--traffic_file', default='./data/pems.h5',
+parser.add_argument('--traffic_file', default='./data/melb.h5',
                     help='traffic file')
-parser.add_argument('--SE_file', default='./data/SE(PeMS).txt',
+parser.add_argument('--SE_file', default='./data/SE(Melb).txt',
                     help='spatial embedding file')
-parser.add_argument('--model_file', default='./data/GMAN_pems.pkl',
+parser.add_argument('--model_file', default='./data/GMAN_melb.pkl',
                     help='save the model to disk')
 parser.add_argument('--log_file', default='./data/log',
                     help='log file')
