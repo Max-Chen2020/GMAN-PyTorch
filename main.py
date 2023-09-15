@@ -22,9 +22,9 @@ parser.add_argument('--time_slot', type=int, default=15,
                     help='a time step is 15 mins')
 parser.add_argument('--num_nodes', default=193,
                     help='number of nodes')
-parser.add_argument('--num_his', type=int, default=4,
+parser.add_argument('--num_his', type=int, default=8,
                     help='history steps')
-parser.add_argument('--num_pred', type=int, default=4,
+parser.add_argument('--num_pred', type=int, default=8,
                     help='prediction steps')
 parser.add_argument('--L', type=int, default=1,
                     help='number of STAtt Blocks')
