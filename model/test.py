@@ -83,9 +83,9 @@ def test(device, args, log):
         testPred = testPred * std[0] + mean[0]
         
     end_test = time.time()
-    train_mae, train_rmse, train_mape = metric(trainPred, trainY[:, :, :, 0])
-    val_mae, val_rmse, val_mape = metric(valPred, valY[:, :, :, 0])
-    test_mae, test_rmse, test_mape = metric(testPred, testY[:, :, :, 0])
+    train_mae, train_rmse, train_mape = metric(trainPred, trainY[..., 0])
+    val_mae, val_rmse, val_mape = metric(valPred, valY[..., 0])
+    test_mae, test_rmse, test_mape = metric(testPred, testY[..., 0])
     log_string(log, 'testing time: %.1fs' % (end_test - start_test))
     log_string(log, '                MAE\t\tRMSE\t\tMAPE')
     log_string(log, 'train            %.2f\t\t%.2f\t\t%.2f%%' %
