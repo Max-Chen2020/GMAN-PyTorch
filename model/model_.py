@@ -336,7 +336,7 @@ class GMAN(nn.Module):
         self.transformAttention = transformAttention(K, d, bn_decay)
         self.FC_1 = FC(input_dims=[2, D], units=[D, D], activations=[F.relu, None],
                        bn_decay=bn_decay)
-        self.FC_2 = FC(input_dims=[D, D], units=[D, 1], activations=[F.relu, None],
+        self.FC_2 = FC(input_dims=[D, D], units=[D, 2], activations=[F.relu, None],
                        bn_decay=bn_decay)
 
     def forward(self, X, TE):
@@ -358,4 +358,4 @@ class GMAN(nn.Module):
         # output
         X = self.FC_2(X)
         del STE, STE_his, STE_pred
-        return torch.squeeze(X, 3) # shape = (num_sample, num_his, dim, var)
+        return X
