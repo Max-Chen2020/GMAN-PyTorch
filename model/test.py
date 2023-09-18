@@ -7,7 +7,7 @@ from utils.utils_ import load_data
 
 def test(device, args, log):
     (trainX, trainTE, trainY, valX, valTE, valY, testX, testTE,
-     testY, SE, mean, std) = load_data(args)
+     testY, SE, mean, std, _, _) = load_data(args)
 
     # move loaded data onto device
     trainX = trainX.to(device)
