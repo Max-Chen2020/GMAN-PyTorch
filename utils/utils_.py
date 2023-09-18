@@ -136,13 +136,13 @@ def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 # physics-informed loss 
-def phy_loss(p, m, pred, label):
+def phy_loss(alpha, p, m, pred, label):
     dl_loss = nn.MSELoss()
     flow = pred[..., 0]
     speed = pred[..., 1]
     phy_loss = torch.abs(torch.pow(flow, 3) * p[0] + torch.square(flow) * p[1] + flow * p[2] + p[3] - speed) - m
-    phy_loss = torch.sum(torch.where(phy_loss <= 0, phy_loss, torch.tensor(0.0)))
-    return dl_loss(flow, label[..., 0]) + phy_loss 
+    phy_loss = torch.sum(torch.where(phy_loss <= 0, torch.tensor(0.0), phy_loss))
+    return (1 - alpha) * dl_loss(flow, label[..., 0]) + alpha * phy_loss 
 
 # The following function can be replaced by 'loss = torch.nn.L1Loss()  loss_out = loss(pred, target)
 def mae_loss(pred, label):
