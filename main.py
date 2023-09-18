@@ -63,19 +63,20 @@ T = 24 * 60 // args.time_slot  # Number of time steps in one day
 # load data
 log_string(log, 'loading data...')
 (trainX, trainTE, trainY, valX, valTE, valY, testX, testTE,
- testY, SE, mean, std) = load_data(args)
+ testY, SE, mean, std, p) = load_data(args)
 log_string(log, f'trainX: {trainX.shape}\t\t trainY: {trainY.shape}')
 log_string(log, f'valX:   {valX.shape}\t\tvalY:   {valY.shape}')
 log_string(log, f'testX:   {testX.shape}\t\ttestY:   {testY.shape}')
-log_string(log, f'speed mean:   {mean[0]:.4f}\t\tstd:   {std[0]:.4f}')
-log_string(log, f'flow mean:   {mean[1]:.4f}\t\tstd:   {std[1]:.4f}')
+log_string(log, f'flow mean:   {mean[0]:.4f}\t\tstd:   {std[0]:.4f}')
+log_string(log, f'mean mean:   {mean[1]:.4f}\t\tstd:   {std[1]:.4f}')
 log_string(log, 'data loaded!')
 del trainX, trainTE, valX, valTE, testX, testTE, mean, std
 # build model
 log_string(log, 'compiling model...')
 
 model = GMAN(SE.to(device), args, bn_decay=0.1)
-loss_criterion = nn.MSELoss()
+# loss_criterion = nn.MSELoss()
+loss_criterion = phy_loss(p)
 
 optimizer = optim.Adam(model.parameters(), args.learning_rate)
 scheduler = optim.lr_scheduler.StepLR(optimizer,
