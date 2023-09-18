@@ -7,7 +7,7 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 
-from utils.utils_ import log_string, plot_train_val_loss
+from utils.utils_ import log_string, phy_loss
 from utils.utils_ import count_parameters, load_data
 
 from model.model_ import GMAN
