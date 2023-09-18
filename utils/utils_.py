@@ -3,6 +3,7 @@ import numpy as np
 import torch
 import matplotlib.pyplot as plt
 from torch.utils.data import Dataset
+import torch.nn as nn
 
 
 # log string
