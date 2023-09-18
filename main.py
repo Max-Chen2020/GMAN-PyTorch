@@ -39,6 +39,8 @@ parser.add_argument('--val_ratio', type=float, default=0.1,
                     help='validation set [default : 0.1]')
 parser.add_argument('--test_ratio', type=float, default=0.2,
                     help='testing set [default : 0.2]')
+parser.add_argument('--alpha', type=float, default=0.5, 
+                    help='ratio of physics-informed loss')
 parser.add_argument('--batch_size', type=int, default=32,
                     help='batch size')
 parser.add_argument('--max_epoch', type=int, default=100,
@@ -77,7 +79,7 @@ log_string(log, 'compiling model...')
 
 model = GMAN(SE.to(device), args, bn_decay=0.1)
 # loss_criterion = nn.MSELoss()
-loss_criterion = partial(phy_loss, p, m)
+loss_criterion = partial(phy_loss, args.alpha, p, m)
 
 optimizer = optim.Adam(model.parameters(), args.learning_rate)
 scheduler = optim.lr_scheduler.StepLR(optimizer,
