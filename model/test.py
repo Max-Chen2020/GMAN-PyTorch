@@ -53,7 +53,8 @@ def test(device, args, log):
             del X, TE, pred_batch
 
         trainPred = torch.cat(trainPred, dim=0)
-        trainPred = trainPred * std[0] + mean[0]
+        trainPred[0] = trainPred[0] * std[0] + mean[0]
+        trainPred[1] = trainPred[1] * std[1] + mean[1] 
 
         valPred = []
         for batch_idx in range(val_num_batch):
@@ -64,9 +65,10 @@ def test(device, args, log):
             pred_batch = model(X, TE)
             valPred.append(pred_batch.detach().clone())
             del X, TE, pred_batch
-        # valPred = torch.from_numpy(np.concatenate(valPred, axis=0))
+
         valPred = torch.cat(valPred, dim=0)
-        valPred = valPred * std[0] + mean[0]
+        valPred[0] = valPred[0] * std[0] + mean[0]
+        valPred[1] = valPred[1] * std[1] + mean[1] 
 
         testPred = []
         start_test = time.time()
@@ -80,12 +82,13 @@ def test(device, args, log):
             del X, TE, pred_batch
 
         testPred = torch.cat(testPred, dim=0)
-        testPred = testPred * std[0] + mean[0]
+        testPred[0] = testPred[0] * std[0] + mean[0]
+        testPred[1] = testPred[1] * std[1] + mean[1] 
         
     end_test = time.time()
-    train_mae, train_rmse, train_mape = metric(trainPred, trainY[..., 0])
-    val_mae, val_rmse, val_mape = metric(valPred, valY[..., 0])
-    test_mae, test_rmse, test_mape = metric(testPred, testY[..., 0])
+    train_mae, train_rmse, train_mape = metric(trainPred[..., 0], trainY[..., 0])
+    val_mae, val_rmse, val_mape = metric(valPred[..., 0], valY[..., 0])
+    test_mae, test_rmse, test_mape = metric(testPred[..., 0], testY[..., 0])
     log_string(log, 'testing time: %.1fs' % (end_test - start_test))
     log_string(log, '                MAE\t\tRMSE\t\tMAPE')
     log_string(log, 'train            %.2f\t\t%.2f\t\t%.2f%%' %
@@ -97,7 +100,7 @@ def test(device, args, log):
     log_string(log, 'performance in each prediction step')
     MAE, RMSE, MAPE = [], [], []
     for step in range(args.num_pred):
-        mae, rmse, mape = metric(testPred[:, step, :], testY[:, step, :, 0])
+        mae, rmse, mape = metric(testPred[:, step, :, 0], testY[:, step, :, 0])
         MAE.append(mae)
         RMSE.append(rmse)
         MAPE.append(mape)
