@@ -68,6 +68,9 @@ def load_data(args):
     x = np.mean(trainX[..., 0].numpy(), axis = 1)
     y = np.mean(trainX[..., 1].numpy(), axis = 1)
     p = np.polyfit(x, y, 3)
+    m = np.max(np.abs(np.power(x, 3) * p[0] + np.square(x) * p[1] + x * p[2] + p[3] - y))
+    p = torch.from_numpy(p)
+    m = torch.tensor(m)
     # normalization
     mean, std = torch.mean(trainX, dim = (0, 1, 2)), torch.std(trainX, dim = (0, 1, 2))
     trainX[:, :, :, 0] = (trainX[:, :, :, 0] - mean[0]) / std[0]
@@ -110,7 +113,7 @@ def load_data(args):
     testTE = torch.cat(testTE, 1).type(torch.int32)
 
     return (trainX, trainTE, trainY, valX, valTE, valY, testX, testTE, testY,
-            SE, mean, std, p)
+            SE, mean, std, p, m)
 
 
 # dataset creation
