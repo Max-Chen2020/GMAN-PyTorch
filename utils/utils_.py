@@ -65,8 +65,8 @@ def load_data(args):
     valX, valY = seq2instance(val, args.num_his, args.num_pred)
     testX, testY = seq2instance(test, args.num_his, args.num_pred)
     # curve fitting 
-    x = np.mean(trainX[..., 0].numpy(), axis = 1)
-    y = np.mean(trainX[..., 1].numpy(), axis = 1)
+    x = np.mean(train[..., 0].numpy(), axis = 1)
+    y = np.mean(train[..., 1].numpy(), axis = 1)
     p = np.polyfit(x, y, 3)
     m = np.max(np.abs(np.power(x, 3) * p[0] + np.square(x) * p[1] + x * p[2] + p[3] - y))
     p = torch.from_numpy(p)
