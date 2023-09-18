@@ -6,6 +6,7 @@ import torch.nn as nn
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
+from functools import partial 
 
 from utils.utils_ import log_string, phy_loss
 from utils.utils_ import count_parameters, load_data
@@ -76,7 +77,7 @@ log_string(log, 'compiling model...')
 
 model = GMAN(SE.to(device), args, bn_decay=0.1)
 # loss_criterion = nn.MSELoss()
-loss_criterion = phy_loss(p, m)
+loss_criterion = partial(phy_loss, p, m)
 
 optimizer = optim.Adam(model.parameters(), args.learning_rate)
 scheduler = optim.lr_scheduler.StepLR(optimizer,
