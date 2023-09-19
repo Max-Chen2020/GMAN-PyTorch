@@ -39,7 +39,7 @@ parser.add_argument('--val_ratio', type=float, default=0.1,
                     help='validation set [default : 0.1]')
 parser.add_argument('--test_ratio', type=float, default=0.2,
                     help='testing set [default : 0.2]')
-parser.add_argument('--alpha', type=float, default=0.5, 
+parser.add_argument('--alpha', type=float, default=0.3, 
                     help='ratio of physics-informed loss')
 parser.add_argument('--batch_size', type=int, default=32,
                     help='batch size')
