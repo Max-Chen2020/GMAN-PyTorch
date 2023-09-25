@@ -60,7 +60,7 @@ def train(device, model, args, log, loss_criterion, optimizer, scheduler):
             pred = model(X, TE)
             pred[..., 0] = pred[..., 0] * std[0] + mean[0]
             pred[..., 1] = pred[..., 1] * std[1] + mean[1]
-            loss_batch = loss_criterion(pred, label[..., 0])
+            loss_batch = loss_criterion(pred, label)
             train_loss += float(loss_batch) * (end_idx - start_idx)
             loss_batch.backward()
             optimizer.step()
@@ -87,7 +87,7 @@ def train(device, model, args, log, loss_criterion, optimizer, scheduler):
                 pred = model(X, TE)
                 pred[..., 0] = pred[..., 0] * std[0] + mean[0]
                 pred[..., 1] = pred[..., 1] * std[1] + mean[1]
-                loss_batch = loss_criterion(pred, label[..., 0])
+                loss_batch = loss_criterion(pred, label)
                 val_loss += float(loss_batch) * (end_idx - start_idx)
                 del X, TE, label, pred, loss_batch
         val_loss /= num_val
