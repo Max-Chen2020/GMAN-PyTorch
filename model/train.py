@@ -10,7 +10,7 @@ def train(device, model, args, log, loss_criterion, optimizer, scheduler):
     model.to(device)
 
     (trainX, trainTE, trainY, valX, valTE, valY, testX, testTE,
-     testY, SE, mean, std, _, _) = load_data(args)
+     testY, SE, mean, std, p, m) = load_data(args)
 
     # move loaded data onto device
     trainX = trainX.to(device)
@@ -60,6 +60,8 @@ def train(device, model, args, log, loss_criterion, optimizer, scheduler):
             pred = model(X, TE)
             pred[0] = pred[0] * std[0] + mean[0]
             pred[1] = pred[1] * std[1] + mean[1]
+            # pred[1] = p[0] * torch.pow(pred[1], 3) + p[1] * torch.square(pred[1]) + p[2] * (pred[1]) + p[3]
+            # label[1] = p[0] * torch.pow(label[1], 3) + p[1] * torch.square(label[1]) + p[2] * (label[1]) + p[3]
             loss_batch = loss_criterion(pred, label)
             train_loss += float(loss_batch) * (end_idx - start_idx)
             loss_batch.backward()
@@ -87,6 +89,8 @@ def train(device, model, args, log, loss_criterion, optimizer, scheduler):
                 pred = model(X, TE)
                 pred[0] = pred[0] * std[0] + mean[0]
                 pred[1] = pred[1] * std[1] + mean[1]
+                # pred[1] = p[0] * torch.pow(pred[1], 3) + p[1] * torch.square(pred[1]) + p[2] * (pred[1]) + p[3]
+                # label[1] = p[0] * torch.pow(label[1], 3) + p[1] * torch.square(label[1]) + p[2] * (label[1]) + p[3]
                 loss_batch = loss_criterion(pred, label)
                 val_loss += float(loss_batch) * (end_idx - start_idx)
                 del X, TE, label, pred, loss_batch
