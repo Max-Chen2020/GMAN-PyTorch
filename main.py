@@ -71,7 +71,8 @@ log_string(log, f'trainX: {trainX.shape}\t\t trainY: {trainY.shape}')
 log_string(log, f'valX:   {valX.shape}\t\tvalY:   {valY.shape}')
 log_string(log, f'testX:   {testX.shape}\t\ttestY:   {testY.shape}')
 log_string(log, f'flow mean:   {mean[0]:.4f}\t\tstd:   {std[0]:.4f}')
-log_string(log, f'mean mean:   {mean[1]:.4f}\t\tstd:   {std[1]:.4f}')
+log_string(log, f'speed mean:   {mean[1]:.4f}\t\tstd:   {std[1]:.4f}')
+log_string(log, f'maximum range:   {m:.4f}')
 log_string(log, 'data loaded!')
 del trainX, trainTE, valX, valTE, testX, testTE, mean, std
 # build model
